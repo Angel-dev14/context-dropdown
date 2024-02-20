@@ -1,0 +1,21 @@
+.dropdown {
+  width: fit-content;
+  border-radius: 4px;
+  padding-left: 1px;
+  box-sizing: content-box;
+  box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
+  position: absolute;
+  z-index: 100;
+  background-color: #fafafa;
+}
+
+.dropdown > .option {
+  padding: 0.5em;
+}
+
+.option:hover {
+  background-color: #fafafa;
+  cursor: pointer;
+  transform: scale(1.015);
+  border-left: red 2px solid;
+}
