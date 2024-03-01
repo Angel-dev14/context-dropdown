@@ -2,8 +2,10 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnInit,
+  Output,
   ViewChild,
 } from '@angular/core';
 import { Option } from '../model/option';
@@ -19,10 +21,15 @@ export class ContextDropdownView implements OnInit, AfterViewInit {
 
   @Input() options!: Option[];
   @ViewChild('dropdown') private _dropdownElement!: ElementRef<HTMLDivElement>;
+  @Output() selectedOption = new EventEmitter<Option>();
 
   constructor() {}
 
   ngOnInit() {}
+
+  selectOption(option: Option) {
+    this.selectedOption.emit(option);
+  }
 
   get xCord() {
     return `${this.x}px`;
