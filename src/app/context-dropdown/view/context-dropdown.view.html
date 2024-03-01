@@ -1,5 +1,3 @@
-<div class='dropdown' [ngStyle]="{'top': yCord, 'left': xCord}">
-  <div *ngFor='let option of options;' class='option'>
-    {{option.name}}
-  </div>
+<div #dropdown class="dropdown" [ngStyle]="{'top': yCord, 'left': xCord}">
+  <div *ngFor="let option of options;" class="option">{{option.name}}</div>
 </div>

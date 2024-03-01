@@ -1,28 +1,28 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit } from '@angular/core';
-import { Options } from '@angular/cli/src/command-builder/command-module';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Option } from '../model/option';
 
 @Component({
   selector: 'context-dropdown-view',
   templateUrl: './context-dropdown.view.html',
-  styleUrls: ['./context-dropdown.view.css']
+  styleUrls: ['./context-dropdown.view.css'],
 })
 export class ContextDropdownView implements OnInit, AfterViewInit {
-
-  @Input(
-  ) x!: number;
-  @Input(
-  ) y!: number;
+  @Input() x!: number;
+  @Input() y!: number;
 
   @Input() options!: Option[];
+  @ViewChild('dropdown') private _dropdownElement!: ElementRef<HTMLDivElement>;
 
-  constructor(
-    private _elementRef: ElementRef,
-  ) {}
+  constructor() {}
 
-  ngOnInit() {
-  }
-
+  ngOnInit() {}
 
   get xCord() {
     return `${this.x}px`;
@@ -32,11 +32,9 @@ export class ContextDropdownView implements OnInit, AfterViewInit {
     return `${this.y}px`;
   }
 
-  get elementRef() {
-    return this._elementRef;
+  get dropdownElement() {
+    return this._dropdownElement.nativeElement;
   }
 
-  ngAfterViewInit(): void {
-    console.log(this.elementRef.nativeElement.childNodes[0].offsetHeight);
-  }
+  ngAfterViewInit(): void {}
 }
