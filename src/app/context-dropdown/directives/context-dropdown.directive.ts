@@ -36,33 +36,37 @@ export class ContextDropdownDirective implements OnInit {
       .subscribe({
         next: (event: PointerEvent) => {
           event.preventDefault();
-          const componentRef =
-            this._viewContainerRef.createComponent(ContextDropdownView);
-          console.log(event);
-          componentRef.instance.options = this.options;
-          componentRef.changeDetectorRef.detectChanges();
-          let xPosition = event.pageX;
-          let yPosition = event.pageY;
-          const dropdownElementDimensions = {
-            x: componentRef.instance.dropdownElement.offsetWidth,
-            y: componentRef.instance.dropdownElement.offsetHeight,
-          };
-          if (
-            window.innerHeight <
-            event.clientY + dropdownElementDimensions.y
-          ) {
-            yPosition = event.pageY - dropdownElementDimensions.y;
-          }
-          if (window.innerWidth < event.clientX + dropdownElementDimensions.x) {
-            xPosition = event.pageX - dropdownElementDimensions.x;
-          }
-          componentRef.instance.x = xPosition;
-          componentRef.instance.y = yPosition;
-          this.opened = true;
-          this.selectedOptionSubscription =
-            componentRef.instance.selectedOption.subscribe((option: Option) => {
-              this.optionSelected.emit(option);
+          // Initial timeout to delay the component creation
+          // Removing this initial setTimeout causes the component to be created and positioned
+          // at (0, 0) and then jumps to the correct coordinates if out of bounds
+          // setTimeout triggers change detection for the entire app, detectChanges() only for the component + children
+          setTimeout(() => {
+            const componentRef =
+              this._viewContainerRef.createComponent(ContextDropdownView);
+            const dimensions = { x: 0, y: 0 };
+
+            const { x, y } = this.setPosition(event, dimensions);
+            componentRef.instance.options = this.options;
+            componentRef.instance.x = x;
+            componentRef.instance.y = y;
+
+            setTimeout(() => {
+              dimensions.x = componentRef.instance.dropdownElement.offsetWidth;
+              dimensions.y = componentRef.instance.dropdownElement.offsetHeight;
+
+              const adjustedPosition = this.setPosition(event, dimensions);
+              componentRef.instance.x = adjustedPosition.x;
+              componentRef.instance.y = adjustedPosition.y;
             });
+
+            this.opened = true;
+            this.selectedOptionSubscription =
+              componentRef.instance.selectedOption.subscribe(
+                (option: Option) => {
+                  this.optionSelected.emit(option);
+                }
+              );
+          });
         },
       });
 
@@ -120,5 +124,23 @@ export class ContextDropdownDirective implements OnInit {
     }
     this._viewContainerRef.clear();
     this.opened = false;
+  }
+
+  private setPosition(
+    event: PointerEvent,
+    dimensions: { x: number; y: number }
+  ): { x: number; y: number } {
+    let xPosition = event.pageX;
+    let yPosition = event.pageY;
+
+    if (window.innerHeight < event.clientY + dimensions.y) {
+      yPosition -= dimensions.y;
+    }
+
+    if (window.innerWidth < event.clientX + dimensions.x) {
+      xPosition -= dimensions.x;
+    }
+
+    return { x: xPosition, y: yPosition };
   }
 }
