@@ -1,4 +1,5 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   Component,
   ElementRef,
@@ -9,19 +10,35 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Option } from '../model/option';
-import { animate, style, transition, trigger } from '@angular/animations';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 
 @Component({
   selector: 'context-dropdown-view',
   templateUrl: './context-dropdown.view.html',
   styleUrls: ['./context-dropdown.view.css'],
   animations: [
-    trigger('dropdownAnimation', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'scaleY(0.1)' }),
+    trigger('dropdownVisibility', [
+      state(
+        'visible',
+        style({
+          opacity: 1,
+          transform: 'scaleY(1)',
+        })
+      ),
+      transition('void => visible', [
+        style({ opacity: 0, transform: 'scaleY(0.8)' }),
+        animate('200ms ease-out'),
+      ]),
+      transition('visible => void', [
         animate(
-          '350ms ease-out',
-          style({ opacity: 1, transform: 'scaleY(1)' })
+          '200ms ease-in',
+          style({ opacity: 0, transform: 'scaleY(0.8)' })
         ),
       ]),
     ]),
@@ -34,6 +51,8 @@ export class ContextDropdownView implements OnInit {
   @Input() options!: Option[];
   @ViewChild('dropdown') private _dropdownElement!: ElementRef<HTMLDivElement>;
   @Output() selectedOption = new EventEmitter<Option>();
+
+  visibility = 'visible';
 
   constructor() {}
 

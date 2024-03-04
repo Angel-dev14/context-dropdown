@@ -2,7 +2,7 @@
   #dropdown
   class="dropdown"
   [ngStyle]="{'top': yCord, 'left': xCord}"
-  @dropdownAnimation
+  [@dropdownVisibility]="visibility"
 >
   <div
     *ngFor="let option of options"
