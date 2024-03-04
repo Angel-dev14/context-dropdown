@@ -239,8 +239,51 @@
     ></div>
   </div>
   <div class="col">
-    <img class="seleted-option" [src]="imagePath" alt="selected option" />
-    <p>{{ imagePath.split("/")[1].split(".")[0] }}</p>
+    <img class="selected-option" [src]="imagePath" alt="selected option" />
+    <p>{{ getFormattedFileName(imagePath) }}</p>
+
+    <!-- Using Angular Material to render the context menu instead of a custom component
+    We loop over the list items -->
+    <div
+      *ngFor="
+        let option of [
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+        ]
+      "
+    >
+      <div>
+        <div (contextmenu)="onRightClick($event)" style="padding-bottom: 20px">
+          Mat-menu {{ option }}
+        </div>
+      </div>
+    </div>
+
+    <!-- a hidden div is created to set the position of appearance of the menu
+    This is an anchor for the menu, as usually it has to be positioned in relation to an 
+  existing elements and not on the click coordinates as we do currently-->
+    <div
+      #menuTrigger="matMenuTrigger"
+      style="visibility: hidden; position: fixed"
+      [style.left.px]="menuTopLeftPosition.x"
+      [style.top.px]="menuTopLeftPosition.y"
+      [matMenuTriggerFor]="rightClickMenu"
+    ></div>
+
+    <!-- standard material menu, this cannot appear without being triggered 
+    by using the trigger.openMenu() method  -->
+    <mat-menu #rightClickMenu="matMenu">
+      <ng-template matMenuContent let-menuOptions="menuOptions">
+        <button
+          mat-menu-item
+          *ngFor="let option of menuOptions"
+          (click)="setSelectedOption(option)"
+        >
+          {{ option.name }}
+        </button>
+      </ng-template>
+    </mat-menu>
   </div>
   <div class="container">
     <div
