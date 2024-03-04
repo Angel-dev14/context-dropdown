@@ -1,5 +1,4 @@
 import {
-  ComponentRef,
   Directive,
   ElementRef,
   EventEmitter,
@@ -9,15 +8,7 @@ import {
   Output,
   ViewContainerRef,
 } from '@angular/core';
-import {
-  Subscription,
-  debounce,
-  debounceTime,
-  filter,
-  fromEvent,
-  map,
-  tap,
-} from 'rxjs';
+import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
 
@@ -39,16 +30,17 @@ export class ContextDropdownDirective implements OnInit {
   ngOnInit() {
     fromEvent(this._elementRef.nativeElement, 'contextmenu')
       .pipe(
+        // Removed as I always want to open a new menu when right clicking the target element
         //filter(() => !this.opened),
         map((event) => event as PointerEvent)
       )
       .subscribe({
         next: (event: PointerEvent) => {
+          event.preventDefault();
           // If we click while a menu is open, it should reopen at the new location
           if (this.opened) {
             this.closeMenu();
           }
-          event.preventDefault();
           // Initial timeout to delay the component creation
           // Removing this initial setTimeout causes the component to be created and positioned
           // at (0, 0) and then jumps to the correct coordinates if out of bounds
@@ -56,7 +48,6 @@ export class ContextDropdownDirective implements OnInit {
           setTimeout(() => {
             const componentRef =
               this._viewContainerRef.createComponent(ContextDropdownView);
-            // Saving the created component for later to be used when closing
             const dimensions = { x: 0, y: 0 };
 
             const { x, y } = this.setPosition(event, dimensions);
