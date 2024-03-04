@@ -27,11 +27,6 @@ export class AppComponent {
   @ViewChild(MatMenuTrigger, { static: true }) matMenuTrigger!: MatMenuTrigger;
   menuTopLeftPosition = { x: 0, y: 0 };
 
-  setSelectedOption(selectedOption: Option) {
-    console.log('Option selected', selectedOption);
-    this.imagePath = `assets/${selectedOption.name.toLowerCase()}.webp`;
-  }
-
   get options() {
     return [
       {
@@ -67,6 +62,10 @@ export class AppComponent {
     this.matMenuTrigger.menuData = { menuOptions: this.options };
 
     this.matMenuTrigger.openMenu();
+  }
+
+  setSelectedOption(selectedOption: Option) {
+    this.imagePath = `assets/${selectedOption.name.toLowerCase()}.webp`;
   }
 
   getFormattedFileName(imagePath: string): string {

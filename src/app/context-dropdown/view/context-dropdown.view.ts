@@ -35,12 +35,6 @@ import {
         style({ opacity: 0, transform: 'scaleY(0.8)' }),
         animate('200ms ease-out'),
       ]),
-      transition('visible => void', [
-        animate(
-          '200ms ease-in',
-          style({ opacity: 0, transform: 'scaleY(0.8)' })
-        ),
-      ]),
     ]),
   ],
 })

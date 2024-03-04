@@ -1,4 +1,5 @@
 import {
+  ComponentRef,
   Directive,
   ElementRef,
   EventEmitter,
@@ -12,6 +13,7 @@ import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { AnimationBuilder, animate, style } from '@angular/animations';
 
 @Directive({
   selector: '[context-dropdown]',
@@ -21,11 +23,13 @@ export class ContextDropdownDirective implements OnInit {
   @Input() options: Option[] = [];
   @Output() optionSelected = new EventEmitter<Option>();
   private selectedOptionSubscription: Subscription | null = null;
+  private componentRef?: ComponentRef<ContextDropdownView>; // Store the reference to the created component
 
   constructor(
     private _elementRef: ElementRef,
     private _viewContainerRef: ViewContainerRef,
-    private _ngZone: NgZone
+    private _ngZone: NgZone,
+    private builder: AnimationBuilder
   ) {}
 
   ngOnInit() {
@@ -48,6 +52,8 @@ export class ContextDropdownDirective implements OnInit {
           setTimeout(() => {
             const componentRef =
               this._viewContainerRef.createComponent(ContextDropdownView);
+            // Saving the created component for later to be used when closing
+            this.componentRef = componentRef;
             const dimensions = { x: 0, y: 0 };
 
             const { x, y } = this.setPosition(event, dimensions);
@@ -127,8 +133,25 @@ export class ContextDropdownDirective implements OnInit {
       this.selectedOptionSubscription.unsubscribe();
       this.selectedOptionSubscription = null;
     }
-    this._viewContainerRef.clear();
-    this.opened = false;
+
+    if (!this.componentRef) {
+      return;
+    }
+
+    const dropdownElement = this.componentRef.instance.dropdownElement;
+
+    const animation = this.builder.build([
+      animate('200ms ease-in', style({ opacity: 0, transform: 'scaleY(0.8)' })),
+    ]);
+
+    const player = animation.create(dropdownElement);
+    player.onDone(() => {
+      this._viewContainerRef.clear();
+      this.opened = false;
+      this.componentRef = undefined;
+    });
+
+    player.play();
   }
 
   private setPosition(

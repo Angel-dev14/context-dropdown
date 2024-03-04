@@ -268,12 +268,12 @@
       style="visibility: hidden; position: fixed"
       [style.left.px]="menuTopLeftPosition.x"
       [style.top.px]="menuTopLeftPosition.y"
-      [matMenuTriggerFor]="rightClickMenu"
+      [matMenuTriggerFor]="contextMenu"
     ></div>
 
     <!-- standard material menu, this cannot appear without being triggered 
     by using the trigger.openMenu() method  -->
-    <mat-menu #rightClickMenu="matMenu">
+    <mat-menu #contextMenu="matMenu">
       <ng-template matMenuContent let-menuOptions="menuOptions">
         <button
           mat-menu-item
