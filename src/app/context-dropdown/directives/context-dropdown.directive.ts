@@ -11,6 +11,7 @@ import {
 import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Directive({
   selector: '[context-dropdown]',
@@ -30,11 +31,15 @@ export class ContextDropdownDirective implements OnInit {
   ngOnInit() {
     fromEvent(this._elementRef.nativeElement, 'contextmenu')
       .pipe(
-        filter(() => !this.opened),
+        //filter(() => !this.opened),
         map((event) => event as PointerEvent)
       )
       .subscribe({
         next: (event: PointerEvent) => {
+          // If we click while a menu is open, it should reopen at the new location
+          if (this.opened) {
+            this.closeMenu();
+          }
           event.preventDefault();
           // Initial timeout to delay the component creation
           // Removing this initial setTimeout causes the component to be created and positioned

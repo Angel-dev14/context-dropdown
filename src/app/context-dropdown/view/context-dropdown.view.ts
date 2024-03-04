@@ -9,13 +9,25 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Option } from '../model/option';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'context-dropdown-view',
   templateUrl: './context-dropdown.view.html',
   styleUrls: ['./context-dropdown.view.css'],
+  animations: [
+    trigger('dropdownAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scaleY(0.1)' }),
+        animate(
+          '350ms ease-out',
+          style({ opacity: 1, transform: 'scaleY(1)' })
+        ),
+      ]),
+    ]),
+  ],
 })
-export class ContextDropdownView implements OnInit, AfterViewInit {
+export class ContextDropdownView implements OnInit {
   @Input() x!: number;
   @Input() y!: number;
 
@@ -42,6 +54,4 @@ export class ContextDropdownView implements OnInit, AfterViewInit {
   get dropdownElement() {
     return this._dropdownElement.nativeElement;
   }
-
-  ngAfterViewInit(): void {}
 }

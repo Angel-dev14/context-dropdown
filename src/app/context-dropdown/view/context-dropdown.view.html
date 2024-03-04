@@ -1,6 +1,11 @@
-<div #dropdown class="dropdown" [ngStyle]="{'top': yCord, 'left': xCord}">
+<div
+  #dropdown
+  class="dropdown"
+  [ngStyle]="{'top': yCord, 'left': xCord}"
+  @dropdownAnimation
+>
   <div
-    *ngFor="let option of options;"
+    *ngFor="let option of options"
     (click)="selectOption(option)"
     class="option"
   >
