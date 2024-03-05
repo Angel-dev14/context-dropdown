@@ -41,37 +41,30 @@ export class ContextDropdownDirective implements OnInit {
           if (this.opened) {
             this.closeMenu();
           }
-          // Initial timeout to delay the component creation
-          // Removing this initial setTimeout causes the component to be created and positioned
-          // at (0, 0) and then jumps to the correct coordinates if out of bounds
-          // setTimeout triggers change detection for the entire app, detectChanges() only for the component + children
+
+          const componentRef =
+            this._viewContainerRef.createComponent(ContextDropdownView);
+          const dimensions = { x: 0, y: 0 };
+
+          const { x, y } = this.setPosition(event, dimensions);
+          componentRef.instance.options = this.options;
+          componentRef.instance.x = x;
+          componentRef.instance.y = y;
+
           setTimeout(() => {
-            const componentRef =
-              this._viewContainerRef.createComponent(ContextDropdownView);
-            const dimensions = { x: 0, y: 0 };
+            dimensions.x = componentRef.instance.dropdownElement.offsetWidth;
+            dimensions.y = componentRef.instance.dropdownElement.offsetHeight;
 
-            const { x, y } = this.setPosition(event, dimensions);
-            componentRef.instance.options = this.options;
-            componentRef.instance.x = x;
-            componentRef.instance.y = y;
-
-            setTimeout(() => {
-              dimensions.x = componentRef.instance.dropdownElement.offsetWidth;
-              dimensions.y = componentRef.instance.dropdownElement.offsetHeight;
-
-              const adjustedPosition = this.setPosition(event, dimensions);
-              componentRef.instance.x = adjustedPosition.x;
-              componentRef.instance.y = adjustedPosition.y;
-            });
-
-            this.opened = true;
-            this.selectedOptionSubscription =
-              componentRef.instance.selectedOption.subscribe(
-                (option: Option) => {
-                  this.optionSelected.emit(option);
-                }
-              );
+            const adjustedPosition = this.setPosition(event, dimensions);
+            componentRef.instance.x = adjustedPosition.x;
+            componentRef.instance.y = adjustedPosition.y;
           });
+
+          this.opened = true;
+          this.selectedOptionSubscription =
+            componentRef.instance.selectedOption.subscribe((option: Option) => {
+              this.optionSelected.emit(option);
+            });
         },
       });
 
