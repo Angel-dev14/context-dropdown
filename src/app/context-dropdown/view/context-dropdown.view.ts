@@ -1,6 +1,4 @@
 import {
-  AfterViewChecked,
-  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -17,6 +15,8 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+
+const visiblity = 'visible';
 
 @Component({
   selector: 'context-dropdown-view',
@@ -39,14 +39,16 @@ import {
   ],
 })
 export class ContextDropdownView implements OnInit {
+  visibility = visiblity;
+
   @Input() x!: number;
   @Input() y!: number;
+  @Input() options: Option[] = [];
 
-  @Input() options!: Option[];
-  @ViewChild('dropdown') private _dropdownElement!: ElementRef<HTMLDivElement>;
   @Output() selectedOption = new EventEmitter<Option>();
 
-  visibility = 'visible';
+  @ViewChild('dropdown', { static: true })
+  private _dropdownElement!: ElementRef<HTMLDivElement>;
 
   constructor() {}
 

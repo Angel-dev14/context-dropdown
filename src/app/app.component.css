@@ -5,10 +5,6 @@
   padding-right: auto;
 }
 
-.test {
-  /*margin-left: auto;*/
-}
-
 .row {
   display: flex;
   justify-content: center;

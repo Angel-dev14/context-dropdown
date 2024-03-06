@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Directive,
   ElementRef,
   EventEmitter,
@@ -12,56 +13,58 @@ import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
 
+interface Position {
+  x: number;
+  y: number;
+}
+
 @Directive({
   selector: '[context-dropdown]',
 })
 export class ContextDropdownDirective implements OnInit {
   opened = false;
+
+  private _selectedOptionSubscription: Subscription | null = null;
+
   @Input() options: Option[] = [];
+
   @Output() optionSelected = new EventEmitter<Option>();
-  private selectedOptionSubscription: Subscription | null = null;
 
   constructor(
     private _elementRef: ElementRef,
     private _viewContainerRef: ViewContainerRef,
-    private _ngZone: NgZone
+    private _ngZone: NgZone,
+    private _cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     fromEvent(this._elementRef.nativeElement, 'contextmenu')
-      .pipe(
-        // Removed as I always want to open a new menu when right clicking the target element
-        //filter(() => !this.opened),
-        map((event) => event as PointerEvent)
-      )
+      .pipe(map((event) => event as PointerEvent))
       .subscribe({
         next: (event: PointerEvent) => {
           event.preventDefault();
           // If we click while a menu is open, it should reopen at the new location
           if (this.opened) {
-            this.closeMenu();
+            this._closeMenu();
           }
 
           const componentRef =
             this._viewContainerRef.createComponent(ContextDropdownView);
-          const dimensions = { x: 0, y: 0 };
 
-          const { x, y } = this.setPosition(event, dimensions);
           componentRef.instance.options = this.options;
-          componentRef.instance.x = x;
-          componentRef.instance.y = y;
+          this._cdr.detectChanges();
 
-          setTimeout(() => {
-            dimensions.x = componentRef.instance.dropdownElement.offsetWidth;
-            dimensions.y = componentRef.instance.dropdownElement.offsetHeight;
+          const dimensions: Position = {
+            x: componentRef.instance.dropdownElement.offsetWidth,
+            y: componentRef.instance.dropdownElement.offsetHeight,
+          };
 
-            const adjustedPosition = this.setPosition(event, dimensions);
-            componentRef.instance.x = adjustedPosition.x;
-            componentRef.instance.y = adjustedPosition.y;
-          });
+          const adjustedPosition = this._setPosition(event, dimensions);
+          componentRef.instance.x = adjustedPosition.x;
+          componentRef.instance.y = adjustedPosition.y;
 
           this.opened = true;
-          this.selectedOptionSubscription =
+          this._selectedOptionSubscription =
             componentRef.instance.selectedOption.subscribe((option: Option) => {
               this.optionSelected.emit(option);
             });
@@ -75,7 +78,7 @@ export class ContextDropdownDirective implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.closeMenu();
+          this._closeMenu();
         },
       });
 
@@ -89,7 +92,7 @@ export class ContextDropdownDirective implements OnInit {
         .subscribe({
           next: () => {
             this._ngZone.run(() => {
-              this.closeMenu();
+              this._closeMenu();
             });
           },
         });
@@ -103,32 +106,19 @@ export class ContextDropdownDirective implements OnInit {
         .subscribe({
           next: () => {
             this._ngZone.run(() => {
-              this.closeMenu();
+              this._closeMenu();
             });
           },
         });
     });
   }
 
-  eventMatchesCurrentContext(event: Event) {
+  public eventMatchesCurrentContext(event: Event) {
     const target = event.target as HTMLElement;
     return (this._elementRef.nativeElement as HTMLElement).contains(target);
   }
 
-  private closeMenu() {
-    if (this.selectedOptionSubscription) {
-      this.selectedOptionSubscription.unsubscribe();
-      this.selectedOptionSubscription = null;
-    }
-
-    this._viewContainerRef.clear();
-    this.opened = false;
-  }
-
-  private setPosition(
-    event: PointerEvent,
-    dimensions: { x: number; y: number }
-  ): { x: number; y: number } {
+  private _setPosition(event: PointerEvent, dimensions: Position): Position {
     let xPosition = event.pageX;
     let yPosition = event.pageY;
 
@@ -141,5 +131,15 @@ export class ContextDropdownDirective implements OnInit {
     }
 
     return { x: xPosition, y: yPosition };
+  }
+
+  private _closeMenu() {
+    if (this._selectedOptionSubscription) {
+      this._selectedOptionSubscription.unsubscribe();
+      this._selectedOptionSubscription = null;
+    }
+
+    this._viewContainerRef.clear();
+    this.opened = false;
   }
 }
