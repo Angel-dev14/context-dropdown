@@ -1,28 +1,62 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit } from '@angular/core';
-import { Options } from '@angular/cli/src/command-builder/command-module';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { Option } from '../model/option';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+
+const visiblity = 'visible';
 
 @Component({
   selector: 'context-dropdown-view',
   templateUrl: './context-dropdown.view.html',
-  styleUrls: ['./context-dropdown.view.css']
+  styleUrls: ['./context-dropdown.view.css'],
+  animations: [
+    trigger('dropdownVisibility', [
+      state(
+        'visible',
+        style({
+          opacity: 1,
+          transform: 'scaleY(1)',
+        })
+      ),
+      transition('void => visible', [
+        style({ opacity: 0, transform: 'scaleY(0.8)' }),
+        animate('200ms ease-out'),
+      ]),
+    ]),
+  ],
 })
-export class ContextDropdownView implements OnInit, AfterViewInit {
+export class ContextDropdownView implements OnInit {
+  visibility = visiblity;
 
-  @Input(
-  ) x!: number;
-  @Input(
-  ) y!: number;
+  @Input() x!: number;
+  @Input() y!: number;
+  @Input() options: Option[] = [];
 
-  @Input() options!: Option[];
+  @Output() selectedOption = new EventEmitter<Option>();
 
-  constructor(
-    private _elementRef: ElementRef,
-  ) {}
+  @ViewChild('dropdown', { static: true })
+  private _dropdownElement!: ElementRef<HTMLDivElement>;
 
-  ngOnInit() {
+  constructor() {}
+
+  ngOnInit() {}
+
+  selectOption(option: Option) {
+    this.selectedOption.emit(option);
   }
-
 
   get xCord() {
     return `${this.x}px`;
@@ -32,11 +66,7 @@ export class ContextDropdownView implements OnInit, AfterViewInit {
     return `${this.y}px`;
   }
 
-  get elementRef() {
-    return this._elementRef;
-  }
-
-  ngAfterViewInit(): void {
-    console.log(this.elementRef.nativeElement.childNodes[0].offsetHeight);
+  get dropdownElement() {
+    return this._dropdownElement.nativeElement;
   }
 }

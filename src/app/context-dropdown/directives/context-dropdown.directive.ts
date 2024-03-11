@@ -1,93 +1,145 @@
-import { Directive, ElementRef, Input, NgZone, OnInit, ViewContainerRef } from '@angular/core';
-import { filter, fromEvent, map } from 'rxjs';
+import {
+  ChangeDetectorRef,
+  Directive,
+  ElementRef,
+  EventEmitter,
+  Input,
+  NgZone,
+  OnInit,
+  Output,
+  ViewContainerRef,
+} from '@angular/core';
+import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
 
+interface Position {
+  x: number;
+  y: number;
+}
+
 @Directive({
-  selector: '[context-dropdown]'
+  selector: '[context-dropdown]',
 })
 export class ContextDropdownDirective implements OnInit {
-
   opened = false;
+
+  private _selectedOptionSubscription: Subscription | null = null;
+
   @Input() options: Option[] = [];
+
+  @Output() optionSelected = new EventEmitter<Option>();
 
   constructor(
     private _elementRef: ElementRef,
     private _viewContainerRef: ViewContainerRef,
-    private _ngZone: NgZone
+    private _ngZone: NgZone,
+    private _cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    fromEvent(this._elementRef.nativeElement, 'contextmenu').pipe(
-      filter(() => !this.opened),
-      map(event => event as PointerEvent)
-    ).subscribe({
-      next: (event: PointerEvent) => {
-        event.preventDefault();
-        const componentRef = this._viewContainerRef.createComponent(
-          ContextDropdownView
-        );
-        console.log(event);
-        let x = 0;
-        let y = 0;
-        const elementRef = componentRef.instance.elementRef;
-        componentRef.instance.options = this.options;
-        componentRef.changeDetectorRef.detectChanges();
-        if (window.innerHeight < event.clientY + elementRef.nativeElement.childNodes[0].offsetHeight) {
-          y = event.pageY - elementRef.nativeElement.childNodes[0].offsetHeight;
-        } else {
-          y = event.pageY;
-        }
-        if (window.innerWidth < event.clientX + elementRef.nativeElement.childNodes[0].offsetWidth) {
-          x = event.pageX - elementRef.nativeElement.childNodes[0].offsetWidth;
-        } else {
-          x = event.pageX;
-        }
-        componentRef.instance.x = x;
-        componentRef.instance.y = y;
-        this.opened = true;
-      }
-    });
+    fromEvent(this._elementRef.nativeElement, 'contextmenu')
+      .pipe(map((event) => event as PointerEvent))
+      .subscribe({
+        next: (event: PointerEvent) => {
+          event.preventDefault();
+          // If we click while a menu is open, it should reopen at the new location
+          if (this.opened) {
+            this._closeMenu();
+          }
 
-    fromEvent(this._elementRef.nativeElement, 'click').pipe(
-      map(event => event as PointerEvent),
-      filter(event => this.eventMatchesCurrentContext(event))
-    ).subscribe({
-      next: () => {
-        this._viewContainerRef.clear();
-        this.opened = false;
-      }
-    });
+          const componentRef =
+            this._viewContainerRef.createComponent(ContextDropdownView);
+
+          componentRef.instance.options = this.options;
+          this._cdr.detectChanges();
+
+          const dimensions: Position = {
+            x: componentRef.instance.dropdownElement.offsetWidth,
+            y: componentRef.instance.dropdownElement.offsetHeight,
+          };
+
+          const adjustedPosition = this._setPosition(event, dimensions);
+          componentRef.instance.x = adjustedPosition.x;
+          componentRef.instance.y = adjustedPosition.y;
+
+          this.opened = true;
+          this._selectedOptionSubscription =
+            componentRef.instance.selectedOption.subscribe((option: Option) => {
+              this.optionSelected.emit(option);
+            });
+        },
+      });
+
+    fromEvent(this._elementRef.nativeElement, 'click')
+      .pipe(
+        map((event) => event as PointerEvent),
+        filter((event) => this.eventMatchesCurrentContext(event))
+      )
+      .subscribe({
+        next: () => {
+          this._closeMenu();
+        },
+      });
 
     this._ngZone.runOutsideAngular(() => {
-      fromEvent(document, 'contextmenu').pipe(
-        filter((event) => !this.eventMatchesCurrentContext(event) && this.opened)
-      ).subscribe({
-        next: () => {
-          this._ngZone.run(() => {
-            this._viewContainerRef.clear();
-            this.opened = false;
-          });
-        }
-      });
+      fromEvent(document, 'contextmenu')
+        .pipe(
+          filter(
+            (event) => !this.eventMatchesCurrentContext(event) && this.opened
+          )
+        )
+        .subscribe({
+          next: () => {
+            this._ngZone.run(() => {
+              this._closeMenu();
+            });
+          },
+        });
 
-      fromEvent(document, 'click').pipe(
-        filter(event => !this.eventMatchesCurrentContext(event) && this.opened)
-      ).subscribe({
-        next: () => {
-          this._ngZone.run(() => {
-            this._viewContainerRef.clear();
-            this.opened = false;
-          });
-        }
-      });
-
+      fromEvent(document, 'click')
+        .pipe(
+          filter(
+            (event) => !this.eventMatchesCurrentContext(event) && this.opened
+          )
+        )
+        .subscribe({
+          next: () => {
+            this._ngZone.run(() => {
+              this._closeMenu();
+            });
+          },
+        });
     });
-
   }
 
-  eventMatchesCurrentContext(event: Event) {
+  public eventMatchesCurrentContext(event: Event) {
     const target = event.target as HTMLElement;
     return (this._elementRef.nativeElement as HTMLElement).contains(target);
+  }
+
+  private _setPosition(event: PointerEvent, dimensions: Position): Position {
+    let xPosition = event.pageX;
+    let yPosition = event.pageY;
+
+    if (window.innerHeight < event.clientY + dimensions.y) {
+      yPosition -= dimensions.y;
+    }
+
+    if (window.innerWidth < event.clientX + dimensions.x) {
+      xPosition -= dimensions.x;
+    }
+
+    return { x: xPosition, y: yPosition };
+  }
+
+  private _closeMenu() {
+    if (this._selectedOptionSubscription) {
+      this._selectedOptionSubscription.unsubscribe();
+      this._selectedOptionSubscription = null;
+    }
+
+    this._viewContainerRef.clear();
+    this.opened = false;
   }
 }

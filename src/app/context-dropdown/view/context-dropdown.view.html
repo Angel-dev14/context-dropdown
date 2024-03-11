@@ -1,5 +1,14 @@
-<div class='dropdown' [ngStyle]="{'top': yCord, 'left': xCord}">
-  <div *ngFor='let option of options;' class='option'>
+<div
+  #dropdown
+  class="dropdown"
+  [ngStyle]="{'top': yCord, 'left': xCord}"
+  [@dropdownVisibility]="visibility"
+>
+  <div
+    *ngFor="let option of options"
+    (click)="selectOption(option)"
+    class="option"
+  >
     {{option.name}}
   </div>
 </div>
