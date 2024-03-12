@@ -11,6 +11,7 @@ import { Option } from '../model/option';
 import {
   Subscription,
   delay,
+  exhaustMap,
   filter,
   fromEvent,
   map,
@@ -42,7 +43,7 @@ export class NestedDropdownDirective {
   ngOnInit(): void {
     fromEvent(this._elementRef.nativeElement, 'mouseenter')
       .pipe(
-        map((event) => event as PointerEvent),
+        exhaustMap(() => of(event as PointerEvent).pipe(delay(200))),
         filter(() => !this.isHoveringOverSubmenu)
       )
       .subscribe({
@@ -79,12 +80,7 @@ export class NestedDropdownDirective {
       });
 
     fromEvent(this._elementRef.nativeElement, 'mouseleave')
-      .pipe(
-        delay(150),
-        map(() => this.isHoveringOverSubmenu),
-
-        filter((isHovering) => !isHovering)
-      )
+      .pipe(filter(() => !this.isHoveringOverSubmenu))
       .subscribe({
         next: () => {
           this.closeSubMenu();
