@@ -8,6 +8,9 @@
     *ngFor="let option of options"
     (click)="selectOption(option)"
     class="option"
+    nested-dropdown
+    [options]="option.subOptions ?? []"
+    (optionSelected)="selectOption(option)"
   >
     {{option.name}}
   </div>

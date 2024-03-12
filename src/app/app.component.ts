@@ -6,6 +6,7 @@ import { Option } from './context-dropdown/model/option';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { imagePath } from './lib/image-path';
+import { optionsData } from './lib/options-data';
 
 const materialComponents = [MatMenuModule, MatMenuTrigger, MatButtonModule];
 const modules = [CommonModule, ContextDropdownModule];
@@ -25,20 +26,7 @@ export class AppComponent {
   @ViewChild(MatMenuTrigger, { static: true }) matMenuTrigger!: MatMenuTrigger;
 
   get options(): Option[] {
-    return [
-      {
-        id: 1,
-        name: 'Pizza',
-      },
-      {
-        id: 2,
-        name: 'Spaghetti',
-      },
-      {
-        id: 3,
-        name: 'Macaroni',
-      },
-    ];
+    return optionsData;
   }
 
   get formattedFileName(): string {

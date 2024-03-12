@@ -13,7 +13,7 @@ import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
 
-interface Position {
+export interface Position {
   x: number;
   y: number;
 }
