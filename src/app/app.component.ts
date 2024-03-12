@@ -7,6 +7,7 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { imagePath } from './lib/image-path';
 import { optionsData } from './lib/options-data';
+import { MatIconModule } from '@angular/material/icon';
 
 const materialComponents = [MatMenuModule, MatMenuTrigger, MatButtonModule];
 const modules = [CommonModule, ContextDropdownModule];

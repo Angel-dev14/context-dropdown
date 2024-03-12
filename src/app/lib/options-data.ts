@@ -73,26 +73,6 @@ export const optionsData: Option[] = [
   {
     id: 4,
     name: 'Salads',
-    subOptions: [
-      {
-        id: 1,
-        name: 'Caesar',
-        subOptions: [
-          { id: 1, name: 'Chicken' },
-          { id: 2, name: 'Shrimp' },
-          { id: 3, name: 'Anchovies' },
-        ],
-      },
-      {
-        id: 2,
-        name: 'Garden',
-        subOptions: [
-          { id: 1, name: 'Cucumbers' },
-          { id: 2, name: 'Tomatoes' },
-          { id: 3, name: 'Olives' },
-          { id: 4, name: 'Onions' },
-        ],
-      },
-    ],
+    subOptions: [],
   },
 ];

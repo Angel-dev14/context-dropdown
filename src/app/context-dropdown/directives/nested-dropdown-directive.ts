@@ -3,9 +3,9 @@ import {
   Directive,
   ElementRef,
   EventEmitter,
-  Input,
+  Input, OnDestroy, OnInit,
   Output,
-  ViewContainerRef,
+  ViewContainerRef
 } from '@angular/core';
 import { Option } from '../model/option';
 import {
@@ -24,9 +24,11 @@ import { Position } from './context-dropdown.directive';
 @Directive({
   selector: '[nested-dropdown]',
 })
-export class NestedDropdownDirective {
+export class NestedDropdownDirective implements OnInit,OnDestroy {
+
   opened = false;
   isHoveringOverSubmenu = false;
+
   @Input() options: Option[] = [];
 
   @Output() optionSelected = new EventEmitter<Option>();
@@ -41,65 +43,6 @@ export class NestedDropdownDirective {
   ) {}
 
   ngOnInit(): void {
-    fromEvent(this._elementRef.nativeElement, 'mouseenter')
-      .pipe(
-        exhaustMap(() => of(event as PointerEvent).pipe(delay(200))),
-        filter(() => !this.isHoveringOverSubmenu)
-      )
-      .subscribe({
-        next: (event: PointerEvent) => {
-          const componentRef =
-            this._viewContainerRef.createComponent(ContextDropdownView);
-          componentRef.instance.options = this.options;
-          this._cdr.detectChanges();
-
-          const adjustedPosition = this._setPosition(
-            event,
-            event.target as HTMLElement
-          );
-          componentRef.instance.x = adjustedPosition.x;
-          componentRef.instance.y = adjustedPosition.y;
-
-          this.isHoveringOverSubmenu = false;
-
-          const submenuElement = componentRef.instance.dropdownElement;
-
-          this.mouseEnterSub = fromEvent(
-            submenuElement,
-            'mouseenter'
-          ).subscribe(() => {
-            this.isHoveringOverSubmenu = true;
-          });
-          this.mouseLeaveSub = fromEvent(
-            submenuElement,
-            'mouseleave'
-          ).subscribe(() => {
-            this.isHoveringOverSubmenu = false;
-          });
-        },
-      });
-
-    fromEvent(this._elementRef.nativeElement, 'mouseleave')
-      .pipe(filter(() => !this.isHoveringOverSubmenu))
-      .subscribe({
-        next: () => {
-          this.closeSubMenu();
-        },
-      });
-  }
-
-  openSubMenu(): void {}
-
-  closeSubMenu(): void {
-    if (this.mouseEnterSub) this.mouseEnterSub.unsubscribe();
-    if (this.mouseLeaveSub) this.mouseLeaveSub.unsubscribe();
-
-    this._viewContainerRef.clear();
-    this.opened = false;
-    this.isHoveringOverSubmenu = false;
-  }
-  ngOnDestroy(): void {
-    this.closeSubMenu();
   }
 
   private _setPosition(
@@ -121,5 +64,8 @@ export class NestedDropdownDirective {
     }
 
     return { x: xPosition, y: yPosition };
+  }
+
+  ngOnDestroy(): void {
   }
 }

@@ -11,13 +11,16 @@
   opacity: 0;
 }
 
-.dropdown > .option {
-  padding: 0.5em;
-}
+/*.dropdown > .option {*/
+/*  padding: 5px 3px;*/
+/*  display: flex;*/
+/*  justify-content: space-between;*/
+/*}*/
 
-.option:hover {
-  background-color: #fafafa;
-  cursor: pointer;
-  transform: scale(1.015);
-  border-left: red 2px solid;
-}
+/*.option:hover {*/
+/*  background-color: #fafafa;*/
+/*  cursor: pointer;*/
+/*  transform: scale(1.015);*/
+/*  border-left: red 2px solid;*/
+/*}*/
+
