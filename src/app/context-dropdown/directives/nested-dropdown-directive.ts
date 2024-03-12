@@ -8,7 +8,15 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Option } from '../model/option';
-import { Subscription, filter, fromEvent, map } from 'rxjs';
+import {
+  Subscription,
+  delay,
+  filter,
+  fromEvent,
+  map,
+  of,
+  switchMap,
+} from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Position } from './context-dropdown.directive';
 
@@ -17,10 +25,13 @@ import { Position } from './context-dropdown.directive';
 })
 export class NestedDropdownDirective {
   opened = false;
-
+  isHoveringOverSubmenu = false;
   @Input() options: Option[] = [];
 
   @Output() optionSelected = new EventEmitter<Option>();
+
+  mouseEnterSub: Subscription | null = null;
+  mouseLeaveSub: Subscription | null = null;
 
   constructor(
     private _elementRef: ElementRef,
@@ -30,55 +41,87 @@ export class NestedDropdownDirective {
 
   ngOnInit(): void {
     fromEvent(this._elementRef.nativeElement, 'mouseenter')
-      .pipe(map((event) => event as PointerEvent))
+      .pipe(
+        map((event) => event as PointerEvent),
+        filter(() => !this.isHoveringOverSubmenu)
+      )
       .subscribe({
         next: (event: PointerEvent) => {
           const componentRef =
             this._viewContainerRef.createComponent(ContextDropdownView);
           componentRef.instance.options = this.options;
           this._cdr.detectChanges();
-          const dimensions: Position = {
-            x: componentRef.instance.dropdownElement.offsetWidth,
-            y: componentRef.instance.dropdownElement.offsetHeight,
-          };
 
-          const adjustedPosition = this._setPosition(event, dimensions);
+          const adjustedPosition = this._setPosition(
+            event,
+            event.target as HTMLElement
+          );
           componentRef.instance.x = adjustedPosition.x;
-          //componentRef.instance.y = adjustedPosition.y;
+          componentRef.instance.y = adjustedPosition.y;
 
-          this.opened = true;
+          this.isHoveringOverSubmenu = false;
+
+          const submenuElement = componentRef.instance.dropdownElement;
+
+          this.mouseEnterSub = fromEvent(
+            submenuElement,
+            'mouseenter'
+          ).subscribe(() => {
+            this.isHoveringOverSubmenu = true;
+          });
+          this.mouseLeaveSub = fromEvent(
+            submenuElement,
+            'mouseleave'
+          ).subscribe(() => {
+            this.isHoveringOverSubmenu = false;
+          });
         },
       });
 
     fromEvent(this._elementRef.nativeElement, 'mouseleave')
-      .pipe(filter(() => this.isHoveringCurrentSubmenu()))
-      .subscribe(() => this.closeSubMenu());
+      .pipe(
+        delay(150),
+        map(() => this.isHoveringOverSubmenu),
+
+        filter((isHovering) => !isHovering)
+      )
+      .subscribe({
+        next: () => {
+          this.closeSubMenu();
+        },
+      });
   }
 
   openSubMenu(): void {}
 
   closeSubMenu(): void {
-    this._viewContainerRef.clear();
-  }
+    if (this.mouseEnterSub) this.mouseEnterSub.unsubscribe();
+    if (this.mouseLeaveSub) this.mouseLeaveSub.unsubscribe();
 
+    this._viewContainerRef.clear();
+    this.opened = false;
+    this.isHoveringOverSubmenu = false;
+  }
   ngOnDestroy(): void {
     this.closeSubMenu();
   }
 
-  private isHoveringCurrentSubmenu(): boolean {
-    return false;
-  }
+  private _setPosition(
+    event: PointerEvent,
+    eventTarget: HTMLElement
+  ): Position {
+    const targetRect = eventTarget.getBoundingClientRect();
+    //console.log(event.target, targetRect);
 
-  private _setPosition(event: PointerEvent, dimensions: Position): Position {
-    let xPosition = event.pageX;
-    let yPosition = event.pageY;
+    let xPosition = targetRect.width;
+    let yPosition = targetRect.height;
 
-    if (window.innerHeight < event.clientY + dimensions.y) {
-      yPosition -= dimensions.y;
+    if (window.innerWidth < event.clientX + xPosition) {
+      xPosition -= xPosition;
     }
 
-    if (window.innerWidth < event.clientX + dimensions.x) {
-      xPosition -= dimensions.x;
+    if (window.innerHeight < event.clientY + yPosition) {
+      yPosition -= yPosition;
     }
 
     return { x: xPosition, y: yPosition };
