@@ -103,11 +103,15 @@ export class ContextDropdownDirective implements OnInit {
     });
   }
 
+  // This is necessary to see if we are clicking on the div where the directive is used
   public eventMatchesCurrentContext(event: Event) {
     const target = event.target as HTMLElement;
     return (this._elementRef.nativeElement as HTMLElement).contains(target);
   }
 
+  // This is necessary to filter document left clicks as otherwise every left click will close the menu
+  // What we want is the menu to only be closed when clicking outside of the context menu
+  // or we have clicked on a childless option, which is where the handleOptionSelection function will close the menu
   public eventMatchesCurrentDropdown(event: Event) {
     const target = event.target as HTMLElement;
     if (!this.componentRef) {
