@@ -1,7 +1,5 @@
 <div #optionElement class="option" (click)="selectOption(option)">
-  <p>
-    {{ option.name }}
-  </p>
+  <p>{{ option.name }}</p>
   @if (option.subOptions && option.subOptions.length > 0) {
   <p>
     <mat-icon>keyboard_arrow_right</mat-icon>

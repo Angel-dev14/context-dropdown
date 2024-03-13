@@ -21,6 +21,8 @@ import {
 } from 'rxjs';
 import { ContextDropdownView } from '../../view/context-dropdown.view';
 
+const contextMenuWidth = 150;
+
 @Component({
   selector: 'custom-option',
   templateUrl: './option.component.html',
@@ -84,39 +86,24 @@ export class OptionComponent implements OnInit {
           viewRef.instance.onOptionSelect = this.onOptionSelect;
           viewRef.instance.options = this.option.subOptions!!;
           const currentOption = this.optionElement.nativeElement as HTMLElement;
-          setTimeout(() => {
-            const dimensions = {
-              x: viewRef.instance.dropdownElement.offsetWidth,
-              y: viewRef.instance.dropdownElement.offsetHeight,
-            };
-            const position = this.getPosition(dimensions);
-            viewRef.instance.x = position.x;
-            viewRef.instance.y = this.index * currentOption.offsetHeight;
-            this.opened = true;
-            this.optionElement.nativeElement.classList.add('selected');
-          });
+          const dimensions = {
+            x: contextMenuWidth,
+          };
+          const position = this.getPosition();
+          viewRef.instance.x = position.x;
+          viewRef.instance.y = this.index * currentOption.offsetHeight;
+          this.opened = true;
+          this.optionElement.nativeElement.classList.add('selected');
         },
       });
   }
 
-  public getPosition(newDropdownDimensions: { x: number; y: number }) {
-    let { x, y } = { x: this.parentPosition.x, y: this.parentPosition.y };
-    console.log(
-      ` windowWidth : ${window.innerWidth} x: ${x} option width:${this.optionElement.nativeElement.offsetWidth}`
-    );
-    if (
-      window.innerWidth <
-      x +
-        (newDropdownDimensions.x + 4) +
-        this.optionElement.nativeElement.offsetWidth
-    ) {
-      x -=
-        newDropdownDimensions.x +
-        (x +
-          (newDropdownDimensions.x <=
-          this.optionElement.nativeElement.offsetWidth
-            ? 8
-            : 4));
+  public getPosition() {
+    let x = this.parentPosition.x;
+
+    if (window.innerWidth < x + (contextMenuWidth * 2 + 4)) {
+      x = 0 - contextMenuWidth - 4;
+
       console.log('Out of bounds', x);
     } else {
       x = this.optionElement.nativeElement.offsetWidth + 4;
@@ -124,7 +111,6 @@ export class OptionComponent implements OnInit {
 
     return {
       x: x,
-      y: y,
     };
   }
 
