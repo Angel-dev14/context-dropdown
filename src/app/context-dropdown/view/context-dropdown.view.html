@@ -1,28 +1,31 @@
 <div
   #dropdown
-  class='dropdown'
+  class="dropdown"
   [ngStyle]="{'top': yCord, 'left': xCord}"
-  [@dropdownVisibility]='visibility'
+  [@dropdownVisibility]="visibility"
 >
-<!--  <div-->
-<!--    *ngFor='let option of options'-->
-<!--    (click)='selectOption(option)'-->
-<!--    class='option'-->
-<!--    [options]='option.subOptions ?? []'-->
-<!--    (optionSelected)='selectOption(option)'-->
-<!--  >-->
-<!--    <p>-->
-<!--      {{ option.name }}-->
-<!--    </p>-->
-<!--    @if (option.subOptions && option.subOptions.length > 0) {-->
-<!--      <p>-->
-<!--        <mat-icon>keyboard_arrow_right</mat-icon>-->
-<!--      </p>-->
-<!--    }-->
-<!--  </div>-->
-  <custom-option *ngFor='let option of options;let i=index'
-          [option]='option' [index]='i'
-                 (hoveredOption)='hoverOption($event)'
-                 [closeRef]='closeRef'
+  <!--  <div-->
+  <!--    *ngFor='let option of options'-->
+  <!--    (click)='selectOption(option)'-->
+  <!--    class='option'-->
+  <!--    [options]='option.subOptions ?? []'-->
+  <!--    (optionSelected)='selectOption(option)'-->
+  <!--  >-->
+  <!--    <p>-->
+  <!--      {{ option.name }}-->
+  <!--    </p>-->
+  <!--    @if (option.subOptions && option.subOptions.length > 0) {-->
+  <!--      <p>-->
+  <!--        <mat-icon>keyboard_arrow_right</mat-icon>-->
+  <!--      </p>-->
+  <!--    }-->
+  <!--  </div>-->
+  <custom-option
+    *ngFor="let option of options;let i=index"
+    [option]="option"
+    [index]="i"
+    [closeRef]="closeRef"
+    (hoveredOption)="hoverOption($event)"
+    [onOptionSelect]="onOptionSelect"
   ></custom-option>
 </div>

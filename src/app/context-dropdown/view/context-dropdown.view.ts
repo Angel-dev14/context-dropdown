@@ -41,15 +41,13 @@ const visiblity = 'visible';
 })
 export class ContextDropdownView implements OnInit {
   visibility = visiblity;
+  hoveredOption: Option | null = null;
+  closeRef = new Subject<Option>();
 
   @Input() x!: number;
   @Input() y!: number;
   @Input() options: Option[] = [];
-
-  hoveredOption: Option | null = null;
-  closeRef = new Subject<Option>();
-
-  @Output() selectedOption = new EventEmitter<Option>();
+  @Input() onOptionSelect!: (option: Option) => void;
 
   @ViewChild('dropdown', { static: true })
   private _dropdownElement!: ElementRef<HTMLDivElement>;
@@ -58,17 +56,9 @@ export class ContextDropdownView implements OnInit {
 
   ngOnInit() {}
 
-  selectOption(option: Option) {
-    this.selectedOption.emit(option);
-  }
-
   hoverOption(option: Option) {
     this.hoveredOption = option;
-    console.log(this.hoveredOption, this.options);
-    // const result = this.options.every(it => it.id != option.id);
-    // if (result) {
-      this.closeRef.next(this.hoveredOption);
-    // }
+    this.closeRef.next(this.hoveredOption);
   }
 
   get xCord() {

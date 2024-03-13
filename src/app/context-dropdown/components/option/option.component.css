@@ -2,11 +2,11 @@
   padding: 5px 3px;
   display: flex;
   justify-content: space-between;
+  border-left: 2px solid transparent;
 }
 
 .option:hover {
   background-color: #fafafa;
   cursor: pointer;
-  transform: scale(1.015);
-  border-left: red 2px solid;
+  border-left-color: red;
 }
