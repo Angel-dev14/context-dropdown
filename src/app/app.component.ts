@@ -7,7 +7,6 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { imagePath } from './lib/image-path';
 import { optionsData } from './lib/options-data';
-import { MatIconModule } from '@angular/material/icon';
 
 const materialComponents = [MatMenuModule, MatMenuTrigger, MatButtonModule];
 const modules = [CommonModule, ContextDropdownModule];
@@ -22,6 +21,7 @@ const modules = [CommonModule, ContextDropdownModule];
 export class AppComponent {
   title = 'context-dropdown';
   imagePath = imagePath;
+  selectedOptionName = 'Select an option';
   menuTopLeftPosition = { x: 0, y: 0 };
 
   @ViewChild(MatMenuTrigger, { static: true }) matMenuTrigger!: MatMenuTrigger;
@@ -32,7 +32,8 @@ export class AppComponent {
 
   get formattedFileName(): string {
     const fileName = this.imagePath.split('/').pop()?.split('.')[0] || '';
-    return fileName.charAt(0).toUpperCase() + fileName.slice(1);
+    return `${fileName.charAt(0).toUpperCase() + fileName.slice(1)} -
+      ${this.selectedOptionName}`;
   }
 
   /**
@@ -53,5 +54,6 @@ export class AppComponent {
 
   setSelectedOption(selectedOption: Option): void {
     this.imagePath = `assets/${selectedOption.type.toLowerCase()}.webp`;
+    this.selectedOptionName = selectedOption.name;
   }
 }

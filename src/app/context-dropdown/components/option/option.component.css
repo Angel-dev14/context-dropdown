@@ -3,10 +3,9 @@
   display: flex;
   justify-content: space-between;
   border-left: 2px solid transparent;
+  cursor: pointer;
 }
 
 .option:hover {
-  background-color: #fafafa;
-  cursor: pointer;
   border-left-color: red;
 }

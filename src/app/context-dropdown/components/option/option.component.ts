@@ -5,6 +5,7 @@ import {
   Input,
   OnInit,
   Output,
+  ViewChild,
   ViewContainerRef,
 } from '@angular/core';
 import { Option } from '../../model/option';
@@ -24,6 +25,8 @@ export class OptionComponent implements OnInit {
 
   @Output() hoveredOption = new EventEmitter<Option>();
 
+  @ViewChild('optionElement') optionElement!: ElementRef<HTMLElement>;
+
   opened = false;
 
   constructor(
@@ -38,6 +41,13 @@ export class OptionComponent implements OnInit {
         next: () => {
           this._viewContainerRef.clear();
           this.opened = false;
+
+          if (
+            this.optionElement.nativeElement.style.borderLeftColor === 'red'
+          ) {
+            this.optionElement.nativeElement.style.borderLeftColor =
+              'transparent';
+          }
         },
       });
 
@@ -47,7 +57,9 @@ export class OptionComponent implements OnInit {
         // If there are no suboptions we should just clear anyway
         // When we update the hoveredOption, this will cause the closeRef to be updated
         // Which will make sure that the other submenus are closed
-        tap(() => this.hoveredOption.emit(this.option)),
+        tap(() => {
+          this.hoveredOption.emit(this.option);
+        }),
         filter(
           () =>
             this.option.subOptions != null &&
@@ -65,12 +77,12 @@ export class OptionComponent implements OnInit {
           viewRef.instance.y = this.index * currentOption.offsetHeight;
           viewRef.instance.options = this.option.subOptions!!;
           this.opened = true;
+          this.optionElement.nativeElement.style.borderLeftColor = 'red';
         },
       });
   }
 
   public selectOption(option: Option) {
-    console.log(option);
     if (this.onOptionSelect) {
       this.onOptionSelect(option);
     }
