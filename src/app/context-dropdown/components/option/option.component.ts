@@ -9,7 +9,17 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Option } from '../../model/option';
-import { delay, filter, fromEvent, of, Subject, switchMap, tap } from 'rxjs';
+import {
+  delay,
+  filter,
+  fromEvent,
+  of,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+  timer,
+} from 'rxjs';
 import { ContextDropdownView } from '../../view/context-dropdown.view';
 
 @Component({
@@ -50,22 +60,25 @@ export class OptionComponent implements OnInit {
         },
       });
 
-    fromEvent(this._elementRef.nativeElement, 'mouseover')
+    const mouseOver$ = fromEvent(
+      this._elementRef.nativeElement,
+      'mouseover'
+    ).pipe(
+      filter((event) => this._targetsCurrentOption(event as PointerEvent))
+    );
+
+    const mouseLeave$ = fromEvent(this._elementRef.nativeElement, 'mouseleave');
+
+    mouseOver$
       .pipe(
-        filter((event) => this._targetsCurrentOption(event as PointerEvent)),
-        // If there are no suboptions we should just clear anyway
-        // When we update the hoveredOption, this will cause the closeRef to be updated
-        // Which will make sure that the other submenus are closed
-        delay(300),
-        tap(() => {
-          this.hoveredOption.emit(this.option);
-        }),
         filter(
           () =>
             this.option.subOptions != null &&
             this.option.subOptions.length > 0 &&
             !this.opened
-        )
+        ),
+        switchMap(() => timer(400).pipe(takeUntil(mouseLeave$))),
+        tap(() => this.hoveredOption.emit(this.option))
       )
       .subscribe({
         next: () => {

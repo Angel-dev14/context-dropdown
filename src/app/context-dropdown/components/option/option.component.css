@@ -7,9 +7,9 @@
 }
 
 .option.selected {
-  border-left-color: orange;
+  border-left-color: #fb923c;
 }
 
 .option:hover {
-  border-left-color: red !important;
+  border-left-color: #dc2626 !important;
 }
