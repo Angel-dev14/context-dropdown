@@ -70,6 +70,7 @@ export class OptionComponent implements OnInit {
   }
 
   public selectOption(option: Option) {
+    console.log(option);
     if (this.onOptionSelect) {
       this.onOptionSelect(option);
     }

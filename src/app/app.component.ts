@@ -52,6 +52,6 @@ export class AppComponent {
   }
 
   setSelectedOption(selectedOption: Option): void {
-    this.imagePath = `assets/${selectedOption.name.toLowerCase()}.webp`;
+    this.imagePath = `assets/${selectedOption.type.toLowerCase()}.webp`;
   }
 }
