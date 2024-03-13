@@ -100,7 +100,7 @@ export class OptionComponent implements OnInit {
 
   public getPosition() {
     let x = this.parentPosition.x;
-
+    const depthIndex = 1;
     if (window.innerWidth < x + (contextMenuWidth * 2 + 4)) {
       x = 0 - contextMenuWidth - 4;
 
