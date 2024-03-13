@@ -6,6 +6,10 @@
   cursor: pointer;
 }
 
+.option.selected {
+  border-left-color: orange;
+}
+
 .option:hover {
-  border-left-color: red;
+  border-left-color: red !important;
 }

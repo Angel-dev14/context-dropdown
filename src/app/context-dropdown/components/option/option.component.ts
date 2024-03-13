@@ -9,7 +9,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Option } from '../../model/option';
-import { filter, fromEvent, Subject, tap } from 'rxjs';
+import { delay, filter, fromEvent, of, Subject, switchMap, tap } from 'rxjs';
 import { ContextDropdownView } from '../../view/context-dropdown.view';
 
 @Component({
@@ -42,11 +42,10 @@ export class OptionComponent implements OnInit {
           this._viewContainerRef.clear();
           this.opened = false;
 
-          if (
-            this.optionElement.nativeElement.style.borderLeftColor === 'red'
-          ) {
-            this.optionElement.nativeElement.style.borderLeftColor =
-              'transparent';
+          // If the marker is already set to red
+          // On childless options, the css hover will color the border
+          if (this.optionElement.nativeElement.classList.contains('selected')) {
+            this.optionElement.nativeElement.classList.remove('selected');
           }
         },
       });
@@ -57,6 +56,7 @@ export class OptionComponent implements OnInit {
         // If there are no suboptions we should just clear anyway
         // When we update the hoveredOption, this will cause the closeRef to be updated
         // Which will make sure that the other submenus are closed
+        delay(300),
         tap(() => {
           this.hoveredOption.emit(this.option);
         }),
@@ -77,7 +77,7 @@ export class OptionComponent implements OnInit {
           viewRef.instance.y = this.index * currentOption.offsetHeight;
           viewRef.instance.options = this.option.subOptions!!;
           this.opened = true;
-          this.optionElement.nativeElement.style.borderLeftColor = 'red';
+          this.optionElement.nativeElement.classList.add('selected');
         },
       });
   }
