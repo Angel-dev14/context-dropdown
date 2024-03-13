@@ -25,7 +25,8 @@
     [option]="option"
     [index]="i"
     [closeRef]="closeRef"
-    (hoveredOption)="hoverOption($event)"
     [onOptionSelect]="onOptionSelect"
+    [parentPosition]="{x:x, y:y}"
+    (hoveredOption)="hoverOption($event)"
   ></custom-option>
 </div>

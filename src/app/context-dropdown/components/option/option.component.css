@@ -11,5 +11,6 @@
 }
 
 .option:hover {
+  background-color: #f4f4f5;
   border-left-color: #dc2626 !important;
 }
