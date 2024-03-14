@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -39,7 +40,7 @@ const visiblity = 'visible';
     ]),
   ],
 })
-export class ContextDropdownView implements OnInit {
+export class ContextDropdownView implements OnInit, AfterViewInit {
   visibility = visiblity;
   hoveredOption: Option | null = null;
   closeRef = new Subject<Option>();
@@ -48,6 +49,7 @@ export class ContextDropdownView implements OnInit {
   @Input() y!: number;
   @Input() options: Option[] = [];
   @Input() depthLevel: number = 1;
+  @Input() cumulativeWidth: number = 0;
   @Input() onOptionSelect!: (option: Option) => void;
 
   @ViewChild('dropdown', { static: true })
@@ -56,6 +58,13 @@ export class ContextDropdownView implements OnInit {
   constructor() {}
 
   ngOnInit() {}
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      const currentWidth = this.dropdownElement.offsetWidth + 4;
+      this.cumulativeWidth += currentWidth;
+    });
+  }
 
   hoverOption(option: Option) {
     this.hoveredOption = option;

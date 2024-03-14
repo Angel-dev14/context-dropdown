@@ -8,5 +8,6 @@
   background-color: #fafafa;
   transform-origin: top;
   opacity: 0;
-  width: 100px;
+  width: fit-content;
+  max-width: 100px;
 }

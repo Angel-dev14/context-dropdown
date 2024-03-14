@@ -4,6 +4,7 @@
   justify-content: space-between;
   border-left: 2px solid transparent;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .option.selected {

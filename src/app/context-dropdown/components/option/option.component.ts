@@ -21,8 +21,6 @@ import {
 } from 'rxjs';
 import { ContextDropdownView } from '../../view/context-dropdown.view';
 
-const contextMenuWidth = 100;
-
 @Component({
   selector: 'custom-option',
   templateUrl: './option.component.html',
@@ -36,6 +34,7 @@ export class OptionComponent implements OnInit {
   @Input() closeRef!: Subject<Option>;
   @Input() onOptionSelect!: (option: Option) => void;
   @Input() depthLevel!: number;
+  @Input() cumulativeWidth!: number;
 
   @Output() hoveredOption = new EventEmitter<Option>();
 
@@ -85,37 +84,49 @@ export class OptionComponent implements OnInit {
           viewRef.instance.onOptionSelect = this.onOptionSelect;
           viewRef.instance.options = this.option.subOptions!!;
           viewRef.instance.depthLevel = this.depthLevel + 1;
-          const currentOption = this.optionElement.nativeElement as HTMLElement;
-          viewRef.instance.x = this.getPosition();
-          viewRef.instance.y = this.index * currentOption.offsetHeight;
-          this.opened = true;
-          this.optionElement.nativeElement.classList.add('selected');
+          viewRef.instance.cumulativeWidth = this.cumulativeWidth;
+          setTimeout(() => {
+            const currentOption = this.optionElement
+              .nativeElement as HTMLElement;
+            viewRef.instance.x = this.getPosition(
+              viewRef.instance.dropdownElement.offsetWidth
+            );
+            viewRef.instance.y = this.index * currentOption.offsetHeight;
+            this.opened = true;
+            this.optionElement.nativeElement.classList.add('selected');
+          });
         },
       });
   }
 
-  public getPosition(): number {
+  public getPosition(newMenuWidth: number): number {
     const padding = 4;
-    // If we remove the depthLevel multiplier here the menus will always overlap
-    const totalRequiredSpaceRight =
-      (contextMenuWidth + padding) * this.depthLevel;
+    const currentMenuWidth = this.optionElement.nativeElement.offsetWidth;
 
     const absolutePosition = this._calculateAbsolutePosition(
       this.optionElement.nativeElement
     );
 
     const availableSpaceRight =
-      window.innerWidth - (absolutePosition.x + contextMenuWidth + padding);
+      window.innerWidth - (absolutePosition.x + currentMenuWidth + padding);
 
-    if (availableSpaceRight >= totalRequiredSpaceRight) {
-      return contextMenuWidth + padding;
+    const totalAvailableSpace =
+      window.innerWidth - (absolutePosition.x + padding);
+
+    if (
+      availableSpaceRight >= newMenuWidth + padding &&
+      totalAvailableSpace >= this.cumulativeWidth + newMenuWidth + padding
+    ) {
+      // The reason we do checks is that otherwise the cumulative width
+      // becomes big and we get a menu to the left when there is still space on the right
+      return currentMenuWidth + padding;
+    } else if (absolutePosition.x >= this.cumulativeWidth) {
+      return -(newMenuWidth + padding);
     } else {
-      if (absolutePosition.x >= totalRequiredSpaceRight) {
-        return -(contextMenuWidth + padding);
-      } else {
-        return contextMenuWidth + padding;
-      }
+      // We default to the a menu on the right
+      return currentMenuWidth + padding;
     }
+    // This handles atleast 3 submenus on small screens, might be unrealistic to target 4+ submenus without any overlap
   }
 
   public selectOption(option: Option): void {
