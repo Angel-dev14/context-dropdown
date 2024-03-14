@@ -113,6 +113,8 @@ export class OptionComponent implements OnInit {
     const totalAvailableSpace =
       window.innerWidth - (absolutePosition.x + padding);
 
+    console.log(`Current: ${currentMenuWidth} New: ${newMenuWidth}`);
+
     if (
       availableSpaceRight >= newMenuWidth + padding &&
       totalAvailableSpace >= this.cumulativeWidth + newMenuWidth + padding
@@ -121,7 +123,12 @@ export class OptionComponent implements OnInit {
       // becomes big and we get a menu to the left when there is still space on the right
       return currentMenuWidth + padding;
     } else if (absolutePosition.x >= this.cumulativeWidth) {
-      return -(newMenuWidth + padding);
+      // In the case of the third option, we have a new menu and current menu width of 93 px
+      // This causes the padding to not be correct which does not make sense
+      // When we go minus 93px to the left, this should jump across the current option and then apply 4px of padding
+      // In this specific case however 7 more pixels are needed but this is just a placeholder
+
+      return -(newMenuWidth + 4 + (newMenuWidth <= currentMenuWidth ? 4 : 0));
     } else {
       // We default to the a menu on the right
       return currentMenuWidth + padding;

@@ -5,6 +5,7 @@
   border-left: 2px solid transparent;
   cursor: pointer;
   box-sizing: border-box;
+  font-size: 0.9em;
 }
 
 .option.selected {
