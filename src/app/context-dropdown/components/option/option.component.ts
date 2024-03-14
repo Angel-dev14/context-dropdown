@@ -35,7 +35,6 @@ export class OptionComponent implements OnInit {
   @Input() index!: number;
   @Input() closeRef!: Subject<Option>;
   @Input() onOptionSelect!: (option: Option) => void;
-  @Input() parentPosition!: { x: number; y: number };
   @Input() depthLevel!: number;
 
   @Output() hoveredOption = new EventEmitter<Option>();
@@ -96,18 +95,27 @@ export class OptionComponent implements OnInit {
   }
 
   public getPosition(): number {
-    let x = Math.abs(this.parentPosition.x);
-    console.log(this.depthLevel);
-    if (
-      window.innerWidth <
-      x + (contextMenuWidth * 2 + 4) * (this.depthLevel + 1)
-    ) {
-      x = 0 - contextMenuWidth - 4;
-    } else {
-      x = contextMenuWidth + 4;
-    }
+    const padding = 4;
+    // If we remove the depthLevel multiplier here the menus will always overlap
+    const totalRequiredSpaceRight =
+      (contextMenuWidth + padding) * this.depthLevel;
 
-    return x;
+    const absolutePosition = this._calculateAbsolutePosition(
+      this.optionElement.nativeElement
+    );
+
+    const availableSpaceRight =
+      window.innerWidth - (absolutePosition.x + contextMenuWidth + padding);
+
+    if (availableSpaceRight >= totalRequiredSpaceRight) {
+      return contextMenuWidth + padding;
+    } else {
+      if (absolutePosition.x >= totalRequiredSpaceRight) {
+        return -(contextMenuWidth + padding);
+      } else {
+        return contextMenuWidth + padding;
+      }
+    }
   }
 
   public selectOption(option: Option): void {
@@ -119,5 +127,23 @@ export class OptionComponent implements OnInit {
   private _targetsCurrentOption(event: PointerEvent): boolean {
     const target = event.target;
     return this._elementRef.nativeElement.contains(target);
+  }
+
+  private _calculateAbsolutePosition(element: HTMLElement): {
+    x: number;
+    y: number;
+  } {
+    let xPosition = 0;
+    let yPosition = 0;
+
+    // recursively calculates the entire distance of the target element from 0,0 to its position
+    // needed to correctly check if the element is out of bounds
+    while (element) {
+      xPosition += element.offsetLeft - element.scrollLeft + element.clientLeft;
+      yPosition += element.offsetTop - element.scrollTop + element.clientTop;
+      element = element.offsetParent as HTMLElement;
+    }
+
+    return { x: xPosition, y: yPosition };
   }
 }
