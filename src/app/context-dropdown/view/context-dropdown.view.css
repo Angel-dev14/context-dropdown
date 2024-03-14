@@ -1,5 +1,4 @@
 .dropdown {
-  width: fit-content;
   border-radius: 4px;
   padding-left: 1px;
   box-sizing: content-box;
@@ -9,18 +8,5 @@
   background-color: #fafafa;
   transform-origin: top;
   opacity: 0;
-  width: 150px;
+  width: 100px;
 }
-
-/*.dropdown > .option {*/
-/*  padding: 5px 3px;*/
-/*  display: flex;*/
-/*  justify-content: space-between;*/
-/*}*/
-
-/*.option:hover {*/
-/*  background-color: #fafafa;*/
-/*  cursor: pointer;*/
-/*  transform: scale(1.015);*/
-/*  border-left: red 2px solid;*/
-/*}*/

@@ -11,7 +11,15 @@ export const optionsData: Option[] = [
         name: 'Pepperoni',
         type: 'Pizza',
         subOptions: [
-          { id: 1, name: 'Extra Cheese', type: 'Pizza' },
+          {
+            id: 1,
+            name: 'Extra Cheese',
+            type: 'Pizza',
+            subOptions: [
+              { id: 1, name: 'Mozarella', type: 'Pizza' },
+              { id: 2, name: 'Cheddar', type: 'Pizza' },
+            ],
+          },
           { id: 2, name: 'Spicy Pepperoni', type: 'Pizza' },
           { id: 3, name: 'Double Layer', type: 'Pizza' },
         ],

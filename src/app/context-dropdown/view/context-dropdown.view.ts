@@ -47,6 +47,7 @@ export class ContextDropdownView implements OnInit {
   @Input() x!: number;
   @Input() y!: number;
   @Input() options: Option[] = [];
+  @Input() depthLevel: number = 1;
   @Input() onOptionSelect!: (option: Option) => void;
 
   @ViewChild('dropdown', { static: true })

@@ -67,7 +67,6 @@ export class ContextDropdownDirective implements OnInit {
           const adjustedPosition = this._setPosition(event, dimensions);
           this.componentRef.instance.x = adjustedPosition.x;
           this.componentRef.instance.y = adjustedPosition.y;
-
           this.opened = true;
         },
       });

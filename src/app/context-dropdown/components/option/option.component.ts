@@ -21,7 +21,7 @@ import {
 } from 'rxjs';
 import { ContextDropdownView } from '../../view/context-dropdown.view';
 
-const contextMenuWidth = 150;
+const contextMenuWidth = 100;
 
 @Component({
   selector: 'custom-option',
@@ -36,6 +36,7 @@ export class OptionComponent implements OnInit {
   @Input() closeRef!: Subject<Option>;
   @Input() onOptionSelect!: (option: Option) => void;
   @Input() parentPosition!: { x: number; y: number };
+  @Input() depthLevel!: number;
 
   @Output() hoveredOption = new EventEmitter<Option>();
 
@@ -43,8 +44,7 @@ export class OptionComponent implements OnInit {
 
   constructor(
     private _elementRef: ElementRef,
-    private _viewContainerRef: ViewContainerRef,
-    private _cdr: ChangeDetectorRef
+    private _viewContainerRef: ViewContainerRef
   ) {}
 
   ngOnInit(): void {
@@ -85,12 +85,9 @@ export class OptionComponent implements OnInit {
             this._viewContainerRef.createComponent(ContextDropdownView);
           viewRef.instance.onOptionSelect = this.onOptionSelect;
           viewRef.instance.options = this.option.subOptions!!;
+          viewRef.instance.depthLevel = this.depthLevel + 1;
           const currentOption = this.optionElement.nativeElement as HTMLElement;
-          const dimensions = {
-            x: contextMenuWidth,
-          };
-          const position = this.getPosition();
-          viewRef.instance.x = position.x;
+          viewRef.instance.x = this.getPosition();
           viewRef.instance.y = this.index * currentOption.offsetHeight;
           this.opened = true;
           this.optionElement.nativeElement.classList.add('selected');
@@ -98,23 +95,22 @@ export class OptionComponent implements OnInit {
       });
   }
 
-  public getPosition() {
-    let x = this.parentPosition.x;
-    const depthIndex = 1;
-    if (window.innerWidth < x + (contextMenuWidth * 2 + 4)) {
+  public getPosition(): number {
+    let x = Math.abs(this.parentPosition.x);
+    console.log(this.depthLevel);
+    if (
+      window.innerWidth <
+      x + (contextMenuWidth * 2 + 4) * (this.depthLevel + 1)
+    ) {
       x = 0 - contextMenuWidth - 4;
-
-      console.log('Out of bounds', x);
     } else {
-      x = this.optionElement.nativeElement.offsetWidth + 4;
+      x = contextMenuWidth + 4;
     }
 
-    return {
-      x: x,
-    };
+    return x;
   }
 
-  public selectOption(option: Option) {
+  public selectOption(option: Option): void {
     if (this.onOptionSelect) {
       this.onOptionSelect(option);
     }
