@@ -5,11 +5,20 @@
   border-left: 2px solid transparent;
   cursor: pointer;
   box-sizing: border-box;
-  font-size: 0.9em;
+  font-size: 0.8em;
+  border-radius: 4px;
 }
 
 .option.selected {
   border-left-color: #fb923c;
+}
+
+.option.selected.last {
+  border-bottom-left-radius: 4px;
+}
+
+.option.option.selected.first {
+  border-top-left-radius: 4px;
 }
 
 .option:hover {

@@ -115,7 +115,7 @@ export class OptionComponent implements OnInit {
   }
 
   private _getPosition(newMenuDimensions: Position): Position {
-    const padding = 4;
+    const padding = 8;
     const currentMenuWidth = this.optionElement.nativeElement.offsetWidth;
     const currentMenuHeigth = this.optionElement.nativeElement.offsetHeight;
     let newPosition = { x: 0, y: 0 };
@@ -149,17 +149,19 @@ export class OptionComponent implements OnInit {
       // In this specific case however 4 more pixels are needed but this is just a placeholder
 
       newPosition.x = -(
-        newMenuDimensions.x +
-        padding +
-        (newMenuDimensions.x <= currentMenuWidth ? padding : 0)
+        (newMenuDimensions.x + padding / 2)
+
+        // + (newMenuDimensions.x <= currentMenuWidth ? padding : 0)
       );
     } else {
       // We default to the a menu on the right
       newPosition.x = currentMenuWidth + padding;
     }
 
-    if (availableSpace.y < currentMenuHeigth * this.index) {
-      newPosition.y = 0;
+    if (availableSpace.y < newMenuDimensions.y) {
+      newPosition.y =
+        this.optionElement.nativeElement.offsetHeight /
+        this.option.subOptions?.length!!;
     } else {
       newPosition.y =
         this.index * this.optionElement.nativeElement.offsetHeight;
@@ -177,17 +179,8 @@ export class OptionComponent implements OnInit {
     x: number;
     y: number;
   } {
-    let xPosition = 0;
-    let yPosition = 0;
+    const rect = element.getBoundingClientRect();
 
-    // recursively calculates the entire distance of the target element from 0,0 to its position
-    // needed to correctly check if the element is out of bounds
-    while (element) {
-      xPosition += element.offsetLeft - element.scrollLeft + element.clientLeft;
-      yPosition += element.offsetTop - element.scrollTop + element.clientTop;
-      element = element.offsetParent as HTMLElement;
-    }
-
-    return { x: xPosition, y: yPosition };
+    return { x: rect.left, y: rect.top };
   }
 }
