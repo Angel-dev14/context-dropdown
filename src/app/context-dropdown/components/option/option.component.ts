@@ -20,6 +20,7 @@ import {
   timer,
 } from 'rxjs';
 import { ContextDropdownView } from '../../view/context-dropdown.view';
+import { Position } from '../../directives/context-dropdown.directive';
 
 @Component({
   selector: 'custom-option',
@@ -86,12 +87,12 @@ export class OptionComponent implements OnInit {
           viewRef.instance.depthLevel = this.depthLevel + 1;
           viewRef.instance.cumulativeWidth = this.cumulativeWidth;
           setTimeout(() => {
-            const currentOption = this.optionElement
-              .nativeElement as HTMLElement;
-            viewRef.instance.x = this.getPosition(
-              viewRef.instance.dropdownElement.offsetWidth
-            );
-            viewRef.instance.y = this.index * currentOption.offsetHeight;
+            const newPosition = this.getPosition({
+              x: viewRef.instance.dropdownElement.offsetWidth,
+              y: viewRef.instance.dropdownElement.offsetHeight,
+            });
+            viewRef.instance.x = newPosition.x;
+            viewRef.instance.y = newPosition.y;
             this.opened = true;
             this.optionElement.nativeElement.classList.add('selected');
           });
@@ -99,41 +100,50 @@ export class OptionComponent implements OnInit {
       });
   }
 
-  public getPosition(newMenuWidth: number): number {
+  public getPosition(newMenuDimensions: Position): Position {
     const padding = 4;
     const currentMenuWidth = this.optionElement.nativeElement.offsetWidth;
+    const currentMenuHeigth = this.optionElement.nativeElement.offsetHeight;
+    let newPosition = { x: 0, y: 0 };
 
     const absolutePosition = this._calculateAbsolutePosition(
       this.optionElement.nativeElement
     );
 
-    const availableSpaceRight =
-      window.innerWidth - (absolutePosition.x + currentMenuWidth + padding);
+    const availableSpace = {
+      x: window.innerWidth - (absolutePosition.x + currentMenuWidth + padding),
+      y: window.innerHeight - (absolutePosition.y + currentMenuHeigth),
+    };
 
-    const totalAvailableSpace =
-      window.innerWidth - (absolutePosition.x + padding);
-
-    console.log(`Current: ${currentMenuWidth} New: ${newMenuWidth}`);
-
-    if (
-      availableSpaceRight >= newMenuWidth + padding &&
-      totalAvailableSpace >= this.cumulativeWidth + newMenuWidth + padding
-    ) {
+    if (availableSpace.x >= (newMenuDimensions.x + padding) * this.depthLevel) {
       // The reason we do checks is that otherwise the cumulative width
       // becomes big and we get a menu to the left when there is still space on the right
-      return currentMenuWidth + padding;
+      newPosition.x = currentMenuWidth + padding;
     } else if (absolutePosition.x >= this.cumulativeWidth) {
       // In the case of the third option, we have a new menu and current menu width of 93 px
       // This causes the padding to not be correct which does not make sense
       // When we go minus 93px to the left, this should jump across the current option and then apply 4px of padding
-      // In this specific case however 7 more pixels are needed but this is just a placeholder
+      // In this specific case however 4 more pixels are needed but this is just a placeholder
 
-      return -(newMenuWidth + 4 + (newMenuWidth <= currentMenuWidth ? 4 : 0));
+      newPosition.x = -(
+        newMenuDimensions.x +
+        4 +
+        (newMenuDimensions.x <= currentMenuWidth ? 4 : 0)
+      );
     } else {
       // We default to the a menu on the right
-      return currentMenuWidth + padding;
+      newPosition.x = currentMenuWidth + padding;
+    }
+
+    if (availableSpace.y < currentMenuHeigth * this.index) {
+      newPosition.y = 0;
+      console.log('Out of bounds heigth', newPosition.y, this.index);
+    } else {
+      newPosition.y =
+        this.index * this.optionElement.nativeElement.offsetHeight;
     }
     // This handles atleast 3 submenus on small screens, might be unrealistic to target 4+ submenus without any overlap
+    return newPosition;
   }
 
   public selectOption(option: Option): void {
