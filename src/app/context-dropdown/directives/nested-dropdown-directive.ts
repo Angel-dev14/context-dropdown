@@ -3,29 +3,20 @@ import {
   Directive,
   ElementRef,
   EventEmitter,
-  Input, OnDestroy, OnInit,
+  Input,
+  OnDestroy,
+  OnInit,
   Output,
-  ViewContainerRef
+  ViewContainerRef,
 } from '@angular/core';
 import { Option } from '../model/option';
-import {
-  Subscription,
-  delay,
-  exhaustMap,
-  filter,
-  fromEvent,
-  map,
-  of,
-  switchMap,
-} from 'rxjs';
-import { ContextDropdownView } from '../view/context-dropdown.view';
+import { Subscription } from 'rxjs';
 import { Position } from './context-dropdown.directive';
 
 @Directive({
   selector: '[nested-dropdown]',
 })
-export class NestedDropdownDirective implements OnInit,OnDestroy {
-
+export class NestedDropdownDirective implements OnInit, OnDestroy {
   opened = false;
   isHoveringOverSubmenu = false;
 
@@ -42,8 +33,7 @@ export class NestedDropdownDirective implements OnInit,OnDestroy {
     private _cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   private _setPosition(
     event: PointerEvent,
@@ -66,6 +56,5 @@ export class NestedDropdownDirective implements OnInit,OnDestroy {
     return { x: xPosition, y: yPosition };
   }
 
-  ngOnDestroy(): void {
-  }
+  ngOnDestroy(): void {}
 }

@@ -51,6 +51,7 @@ export class ContextDropdownView implements OnInit, AfterViewInit {
   @Input() depthLevel: number = 1;
   @Input() cumulativeWidth: number = 0;
   @Input() onOptionSelect!: (option: Option) => void;
+  @Input() parentOption: Option | undefined = undefined;
 
   @ViewChild('dropdown', { static: true })
   private _dropdownElement!: ElementRef<HTMLDivElement>;

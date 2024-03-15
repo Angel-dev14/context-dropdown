@@ -30,12 +30,6 @@ export class AppComponent {
     return optionsData;
   }
 
-  get formattedFileName(): string {
-    const fileName = this.imagePath.split('/').pop()?.split('.')[0] || '';
-    return `${fileName.charAt(0).toUpperCase() + fileName.slice(1)} -
-      ${this.selectedOptionName}`;
-  }
-
   /**
    * Method called when the user click with the right button
    * @param event MouseEvent, it contains the coordinates
@@ -53,7 +47,16 @@ export class AppComponent {
   }
 
   setSelectedOption(selectedOption: Option): void {
+    console.log(selectedOption);
     this.imagePath = `assets/${selectedOption.type.toLowerCase()}.webp`;
-    this.selectedOptionName = selectedOption.name;
+    let optionChain = selectedOption.name;
+    let currentOption: Option | undefined = selectedOption.parent;
+
+    while (currentOption) {
+      optionChain = `${currentOption.name} - ${optionChain}`;
+      currentOption = currentOption.parent; // goes to the next parent
+    }
+
+    this.selectedOptionName = optionChain;
   }
 }

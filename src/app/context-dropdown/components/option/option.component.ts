@@ -36,6 +36,10 @@ export class OptionComponent implements OnInit {
   @Input() onOptionSelect!: (option: Option) => void;
   @Input() depthLevel!: number;
   @Input() cumulativeWidth!: number;
+  @Input()
+  set parentOption(value: Option | undefined) {
+    this.option.parent = value;
+  }
 
   @Output() hoveredOption = new EventEmitter<Option>();
 
@@ -69,14 +73,16 @@ export class OptionComponent implements OnInit {
 
     mouseOver$
       .pipe(
+        // Even if it should get filtered, I still want options with no suboptions
+        // to clear the previously opened nested menus
+        switchMap(() => timer(200).pipe(takeUntil(mouseLeave$))),
+        tap(() => this.hoveredOption.emit(this.option)),
         filter(
           () =>
             this.option.subOptions != null &&
             this.option.subOptions.length > 0 &&
             !this.opened
-        ),
-        switchMap(() => timer(200).pipe(takeUntil(mouseLeave$))),
-        tap(() => this.hoveredOption.emit(this.option))
+        )
       )
       .subscribe({
         next: () => {
@@ -86,8 +92,10 @@ export class OptionComponent implements OnInit {
           viewRef.instance.options = this.option.subOptions!!;
           viewRef.instance.depthLevel = this.depthLevel + 1;
           viewRef.instance.cumulativeWidth = this.cumulativeWidth;
+          viewRef.instance.parentOption = this.option;
+
           setTimeout(() => {
-            const newPosition = this.getPosition({
+            const newPosition = this._getPosition({
               x: viewRef.instance.dropdownElement.offsetWidth,
               y: viewRef.instance.dropdownElement.offsetHeight,
             });
@@ -100,7 +108,13 @@ export class OptionComponent implements OnInit {
       });
   }
 
-  public getPosition(newMenuDimensions: Position): Position {
+  public selectOption(option: Option): void {
+    if (this.onOptionSelect) {
+      this.onOptionSelect(option);
+    }
+  }
+
+  private _getPosition(newMenuDimensions: Position): Position {
     const padding = 4;
     const currentMenuWidth = this.optionElement.nativeElement.offsetWidth;
     const currentMenuHeigth = this.optionElement.nativeElement.offsetHeight;
@@ -109,17 +123,26 @@ export class OptionComponent implements OnInit {
     const absolutePosition = this._calculateAbsolutePosition(
       this.optionElement.nativeElement
     );
+    const totalAvailableSpace =
+      window.innerWidth - (absolutePosition.x + padding);
 
     const availableSpace = {
       x: window.innerWidth - (absolutePosition.x + currentMenuWidth + padding),
       y: window.innerHeight - (absolutePosition.y + currentMenuHeigth),
     };
 
-    if (availableSpace.x >= (newMenuDimensions.x + padding) * this.depthLevel) {
+    if (
+      availableSpace.x >= (newMenuDimensions.x + padding) * this.depthLevel &&
+      totalAvailableSpace >=
+        this.cumulativeWidth + newMenuDimensions.x + padding
+    ) {
       // The reason we do checks is that otherwise the cumulative width
       // becomes big and we get a menu to the left when there is still space on the right
       newPosition.x = currentMenuWidth + padding;
-    } else if (absolutePosition.x >= this.cumulativeWidth) {
+    } else if (
+      absolutePosition.x >= this.cumulativeWidth &&
+      availableSpace.x <= (newMenuDimensions.x + padding) * this.depthLevel
+    ) {
       // In the case of the third option, we have a new menu and current menu width of 93 px
       // This causes the padding to not be correct which does not make sense
       // When we go minus 93px to the left, this should jump across the current option and then apply 4px of padding
@@ -127,8 +150,8 @@ export class OptionComponent implements OnInit {
 
       newPosition.x = -(
         newMenuDimensions.x +
-        4 +
-        (newMenuDimensions.x <= currentMenuWidth ? 4 : 0)
+        padding +
+        (newMenuDimensions.x <= currentMenuWidth ? padding : 0)
       );
     } else {
       // We default to the a menu on the right
@@ -137,19 +160,12 @@ export class OptionComponent implements OnInit {
 
     if (availableSpace.y < currentMenuHeigth * this.index) {
       newPosition.y = 0;
-      console.log('Out of bounds heigth', newPosition.y, this.index);
     } else {
       newPosition.y =
         this.index * this.optionElement.nativeElement.offsetHeight;
     }
     // This handles atleast 3 submenus on small screens, might be unrealistic to target 4+ submenus without any overlap
     return newPosition;
-  }
-
-  public selectOption(option: Option): void {
-    if (this.onOptionSelect) {
-      this.onOptionSelect(option);
-    }
   }
 
   private _targetsCurrentOption(event: PointerEvent): boolean {
