@@ -5,6 +5,7 @@ export const optionsData: Option[] = [
     id: 1,
     name: 'Pizza',
     type: 'Pizza',
+    iconName: 'local_pizza',
     subOptions: [
       {
         id: 1,
@@ -15,13 +16,27 @@ export const optionsData: Option[] = [
             id: 1,
             name: 'Extra Cheese',
             type: 'Pizza',
+
             subOptions: [
-              { id: 1, name: 'Mozarella', type: 'Pizza' },
-              { id: 2, name: 'Cheddar', type: 'Pizza' },
+              {
+                id: 1,
+                name: 'Mozarella',
+                type: 'Pizza',
+              },
+              {
+                id: 2,
+                name: 'Cheddar',
+                type: 'Pizza',
+              },
             ],
           },
-          { id: 2, name: 'Spicy Pepperoni', type: 'Pizza' },
-          { id: 3, name: 'Double Layer', type: 'Pizza' },
+          {
+            id: 2,
+            name: 'Spicy Pepperoni',
+            type: 'Pizza',
+            iconName: 'whatshot',
+          },
+          { id: 3, name: 'Double Layer', type: 'Pizza', iconName: 'layers' },
         ],
       },
       {
@@ -30,7 +45,11 @@ export const optionsData: Option[] = [
         type: 'Pizza',
         subOptions: [
           { id: 1, name: 'Basil', type: 'Pizza' },
-          { id: 2, name: 'No Cheese', type: 'Pizza' },
+          {
+            id: 2,
+            name: 'No Cheese',
+            type: 'Pizza',
+          },
         ],
       },
       {
@@ -49,6 +68,7 @@ export const optionsData: Option[] = [
     id: 2,
     name: 'Spaghetti',
     type: 'Spaghetti',
+    iconName: 'straighten',
     subOptions: [
       {
         id: 1,
@@ -74,6 +94,7 @@ export const optionsData: Option[] = [
     id: 3,
     name: 'Macaroni',
     type: 'Macaroni',
+    iconName: 'donut_large',
     subOptions: [
       {
         id: 1,
@@ -92,6 +113,7 @@ export const optionsData: Option[] = [
     id: 4,
     name: 'Salad',
     type: 'Salad',
+    iconName: 'spa',
     subOptions: [],
   },
 ];

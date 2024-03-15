@@ -4,4 +4,5 @@ export interface Option {
   subOptions?: Option[];
   parent?: Option;
   type: string;
+  iconName?: string;
 }

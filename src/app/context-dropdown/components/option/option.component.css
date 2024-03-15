@@ -1,5 +1,5 @@
 .option {
-  padding: 5px 3px;
+  padding: 2px;
   display: flex;
   justify-content: space-between;
   border-left: 2px solid transparent;
@@ -13,12 +13,15 @@
   border-left-color: #fb923c;
 }
 
-.option.selected.last {
-  border-bottom-left-radius: 4px;
+.icon-row {
+  display: flex;
+  align-items: flex-start;
 }
-
-.option.option.selected.first {
-  border-top-left-radius: 4px;
+.arrow-icon {
+  scale: 0.7;
+}
+.inline-icon {
+  scale: 0.5;
 }
 
 .option:hover {

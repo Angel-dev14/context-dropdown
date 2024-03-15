@@ -115,7 +115,7 @@ export class OptionComponent implements OnInit {
   }
 
   private _getPosition(newMenuDimensions: Position): Position {
-    const padding = 8;
+    const padding = 6;
     const currentMenuWidth = this.optionElement.nativeElement.offsetWidth;
     const currentMenuHeigth = this.optionElement.nativeElement.offsetHeight;
     let newPosition = { x: 0, y: 0 };
@@ -140,8 +140,8 @@ export class OptionComponent implements OnInit {
       // becomes big and we get a menu to the left when there is still space on the right
       newPosition.x = currentMenuWidth + padding;
     } else if (
-      absolutePosition.x >= this.cumulativeWidth &&
-      availableSpace.x <= (newMenuDimensions.x + padding) * this.depthLevel
+      absolutePosition.x >= this.cumulativeWidth
+      //  && availableSpace.x <= (newMenuDimensions.x + padding) * this.depthLevel
     ) {
       // In the case of the third option, we have a new menu and current menu width of 93 px
       // This causes the padding to not be correct which does not make sense
