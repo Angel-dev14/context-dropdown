@@ -34,9 +34,8 @@ export const optionsData: Option[] = [
             id: 2,
             name: 'Spicy Pepperoni',
             type: 'Pizza',
-            iconName: 'whatshot',
           },
-          { id: 3, name: 'Double Layer', type: 'Pizza', iconName: 'layers' },
+          { id: 3, name: 'Double Layer', type: 'Pizza' },
         ],
       },
       {

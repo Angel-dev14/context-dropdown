@@ -149,9 +149,9 @@ export class OptionComponent implements OnInit {
       // In this specific case however 4 more pixels are needed but this is just a placeholder
 
       newPosition.x = -(
-        newMenuDimensions.x +
-        padding / 2 +
-        (newMenuDimensions.x <= currentMenuWidth ? padding : 0)
+        (newMenuDimensions.x + padding / 2)
+
+        // + (newMenuDimensions.x <= currentMenuWidth ? padding : 0)
       );
     } else {
       // We default to the a menu on the right
