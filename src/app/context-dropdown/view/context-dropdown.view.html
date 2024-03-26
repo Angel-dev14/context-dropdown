@@ -4,11 +4,15 @@
   [ngStyle]="{'top': yCord, 'left': xCord}"
   [@dropdownVisibility]="visibility"
 >
-  <div
-    *ngFor="let option of options"
-    (click)="selectOption(option)"
-    class="option"
-  >
-    {{option.name}}
-  </div>
+  <custom-option
+    *ngFor="let option of options;let i=index"
+    [option]="option"
+    [index]="i"
+    [closeRef]="closeRef"
+    [onOptionSelect]="onOptionSelect"
+    [depthLevel]="depthLevel"
+    [parentOption]="parentOption"
+    [cumulativeWidth]="cumulativeWidth"
+    (hoveredOption)="hoverOption($event)"
+  ></custom-option>
 </div>

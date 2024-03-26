@@ -1,5 +1,6 @@
 import {
   ChangeDetectorRef,
+  ComponentRef,
   Directive,
   ElementRef,
   EventEmitter,
@@ -13,7 +14,7 @@ import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
 
-interface Position {
+export interface Position {
   x: number;
   y: number;
 }
@@ -23,6 +24,8 @@ interface Position {
 })
 export class ContextDropdownDirective implements OnInit {
   opened = false;
+  optionSelectedVar: Option | null = null;
+  componentRef: ComponentRef<ContextDropdownView> | undefined;
 
   private _selectedOptionSubscription: Subscription | null = null;
 
@@ -48,37 +51,23 @@ export class ContextDropdownDirective implements OnInit {
             this._closeMenu();
           }
 
-          const componentRef =
+          this.componentRef =
             this._viewContainerRef.createComponent(ContextDropdownView);
+          this.componentRef.instance.onOptionSelect =
+            this.handleOptionSelection.bind(this);
 
-          componentRef.instance.options = this.options;
+          this.componentRef.instance.options = this.options;
           this._cdr.detectChanges();
 
           const dimensions: Position = {
-            x: componentRef.instance.dropdownElement.offsetWidth,
-            y: componentRef.instance.dropdownElement.offsetHeight,
+            x: this.componentRef.instance.dropdownElement.offsetWidth,
+            y: this.componentRef.instance.dropdownElement.offsetHeight,
           };
 
           const adjustedPosition = this._setPosition(event, dimensions);
-          componentRef.instance.x = adjustedPosition.x;
-          componentRef.instance.y = adjustedPosition.y;
-
+          this.componentRef.instance.x = adjustedPosition.x;
+          this.componentRef.instance.y = adjustedPosition.y;
           this.opened = true;
-          this._selectedOptionSubscription =
-            componentRef.instance.selectedOption.subscribe((option: Option) => {
-              this.optionSelected.emit(option);
-            });
-        },
-      });
-
-    fromEvent(this._elementRef.nativeElement, 'click')
-      .pipe(
-        map((event) => event as PointerEvent),
-        filter((event) => this.eventMatchesCurrentContext(event))
-      )
-      .subscribe({
-        next: () => {
-          this._closeMenu();
         },
       });
 
@@ -100,7 +89,7 @@ export class ContextDropdownDirective implements OnInit {
       fromEvent(document, 'click')
         .pipe(
           filter(
-            (event) => !this.eventMatchesCurrentContext(event) && this.opened
+            (event) => !this.eventMatchesCurrentDropdown(event) && this.opened
           )
         )
         .subscribe({
@@ -113,9 +102,40 @@ export class ContextDropdownDirective implements OnInit {
     });
   }
 
+  // This is necessary to see if we are clicking on the div where the directive is used
   public eventMatchesCurrentContext(event: Event) {
     const target = event.target as HTMLElement;
     return (this._elementRef.nativeElement as HTMLElement).contains(target);
+  }
+
+  // This is necessary to filter document left clicks as otherwise every left click will close the menu
+  // What we want is the menu to only be closed when clicking outside of the context menu
+  // or we have clicked on a childless option, which is where the handleOptionSelection function will close the menu
+  public eventMatchesCurrentDropdown(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!this.componentRef) {
+      return false;
+    } else {
+      return (
+        this.componentRef?.instance.dropdownElement as HTMLElement
+      ).contains(target);
+    }
+  }
+
+  public handleOptionSelection(option: Option): void {
+    this.optionSelectedVar = option;
+    if (!this.hasSubOptions()) {
+      this._closeMenu();
+      this.optionSelected.emit(option);
+    }
+  }
+
+  public hasSubOptions(): boolean {
+    return !!(
+      this.optionSelectedVar &&
+      this.optionSelectedVar.subOptions &&
+      this.optionSelectedVar.subOptions.length > 0
+    );
   }
 
   private _setPosition(event: PointerEvent, dimensions: Position): Position {

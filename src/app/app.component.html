@@ -1,4 +1,13 @@
 <div class="row">
+  <div
+    *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]"
+    class="test"
+    context-dropdown
+    [options]="options"
+    (optionSelected)="setSelectedOption($event)"
+  ></div>
+</div>
+<div class="row">
   <div class="container">
     <div
       class="test"
@@ -240,7 +249,7 @@
   </div>
   <div class="col">
     <img class="selected-option" [src]="imagePath" alt="selected option" />
-    <p>{{ formattedFileName }}</p>
+    <p>{{ selectedOptionName }}</p>
 
     <!-- Using Angular Material to render the context menu instead of a custom component
     We loop over the list items -->

@@ -1,10 +1,9 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
-  EventEmitter,
   Input,
   OnInit,
-  Output,
   ViewChild,
 } from '@angular/core';
 import { Option } from '../model/option';
@@ -15,6 +14,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+import { Subject } from 'rxjs';
 
 const visiblity = 'visible';
 
@@ -38,14 +38,18 @@ const visiblity = 'visible';
     ]),
   ],
 })
-export class ContextDropdownView implements OnInit {
+export class ContextDropdownView implements OnInit, AfterViewInit {
   visibility = visiblity;
+  hoveredOption: Option | null = null;
+  closeRef = new Subject<Option>();
 
   @Input() x!: number;
   @Input() y!: number;
   @Input() options: Option[] = [];
-
-  @Output() selectedOption = new EventEmitter<Option>();
+  @Input() depthLevel: number = 1;
+  @Input() cumulativeWidth: number = 0;
+  @Input() onOptionSelect!: (option: Option) => void;
+  @Input() parentOption: Option | undefined = undefined;
 
   @ViewChild('dropdown', { static: true })
   private _dropdownElement!: ElementRef<HTMLDivElement>;
@@ -54,8 +58,16 @@ export class ContextDropdownView implements OnInit {
 
   ngOnInit() {}
 
-  selectOption(option: Option) {
-    this.selectedOption.emit(option);
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      const currentWidth = this.dropdownElement.offsetWidth + 4;
+      this.cumulativeWidth += currentWidth;
+    });
+  }
+
+  hoverOption(option: Option) {
+    this.hoveredOption = option;
+    this.closeRef.next(this.hoveredOption);
   }
 
   get xCord() {
@@ -69,4 +81,6 @@ export class ContextDropdownView implements OnInit {
   get dropdownElement() {
     return this._dropdownElement.nativeElement;
   }
+
+  protected readonly close = close;
 }
