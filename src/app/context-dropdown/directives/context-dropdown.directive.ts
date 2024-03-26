@@ -10,7 +10,7 @@ import {
   Output,
   ViewContainerRef,
 } from '@angular/core';
-import { Subscription, filter, fromEvent, map, tap } from 'rxjs';
+import { Subscription, filter, fromEvent, map } from 'rxjs';
 import { ContextDropdownView } from '../view/context-dropdown.view';
 import { Option } from '../model/option';
 
