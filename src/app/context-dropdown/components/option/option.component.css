@@ -1,6 +1,7 @@
 .option {
-  padding: 2px;
+  padding: 8px 4px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   border-left: 2px solid transparent;
   cursor: pointer;
@@ -15,15 +16,21 @@
 
 .icon-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  /* Without this the arrow is only on the right edge on the longest word */
+  flex: 1;
 }
 
-.arrow-icon {
-  scale: 0.7;
+.option p {
+  white-space: normal;
+  margin: 0 10px;
+  /* This makes the text stretch in the middle so that it fills the space in the center */
+  flex: 1;
 }
-
+.arrow-icon,
 .inline-icon {
-  scale: 0.5;
+  flex-shrink: 0;
+  scale: 0.6;
 }
 
 .option:hover {

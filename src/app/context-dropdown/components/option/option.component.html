@@ -7,8 +7,8 @@
     <p>
       {{ option.name }}
     </p>
+    @if (option.subOptions && option.subOptions.length > 0) {
+    <mat-icon class="arrow-icon">keyboard_arrow_right</mat-icon>
+    }
   </div>
-  @if (option.subOptions && option.subOptions.length > 0) {
-  <mat-icon class="arrow-icon">keyboard_arrow_right</mat-icon>
-  }
 </div>

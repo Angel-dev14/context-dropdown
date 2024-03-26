@@ -7,8 +7,9 @@
   background-color: #fafafa;
   transform-origin: top;
   opacity: 0;
-  min-width: 6rem;
-  max-width: 7rem;
+  max-width: 12rem;
+  font-size: 1.05em;
+  font-weight: 500;
   border: 1px solid #0f172a;
   padding: 4px 2px;
 }

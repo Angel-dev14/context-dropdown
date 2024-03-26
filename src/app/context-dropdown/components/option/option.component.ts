@@ -1,5 +1,4 @@
 import {
-  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -75,7 +74,7 @@ export class OptionComponent implements OnInit {
       .pipe(
         // Even if it should get filtered, I still want options with no suboptions
         // to clear the previously opened nested menus
-        switchMap(() => timer(200).pipe(takeUntil(mouseLeave$))),
+        switchMap(() => timer(250).pipe(takeUntil(mouseLeave$))),
         tap(() => this.hoveredOption.emit(this.option)),
         filter(
           () =>
@@ -94,6 +93,8 @@ export class OptionComponent implements OnInit {
           viewRef.instance.cumulativeWidth = this.cumulativeWidth;
           viewRef.instance.parentOption = this.option;
 
+          /*  Using the cdr ref instead of the timeout here still resulted in the
+          new dimensions returning as 1,0 so I opted for setTimeout detection trigger */
           setTimeout(() => {
             const newPosition = this._getPosition({
               x: viewRef.instance.dropdownElement.offsetWidth,
@@ -115,7 +116,7 @@ export class OptionComponent implements OnInit {
   }
 
   private _getPosition(newMenuDimensions: Position): Position {
-    const padding = 6;
+    const padding = 8;
     const currentMenuWidth = this.optionElement.nativeElement.offsetWidth;
     const currentMenuHeigth = this.optionElement.nativeElement.offsetHeight;
     let newPosition = { x: 0, y: 0 };
@@ -136,28 +137,27 @@ export class OptionComponent implements OnInit {
       totalAvailableSpace >=
         this.cumulativeWidth + newMenuDimensions.x + padding
     ) {
-      // The reason we do checks is that otherwise the cumulative width
+      // The reason we do the second check is that otherwise the cumulative width
       // becomes big and we get a menu to the left when there is still space on the right
       newPosition.x = currentMenuWidth + padding;
-    } else if (
-      absolutePosition.x >= this.cumulativeWidth
-      //  && availableSpace.x <= (newMenuDimensions.x + padding) * this.depthLevel
-    ) {
-      // In the case of the third option, we have a new menu and current menu width of 93 px
-      // This causes the padding to not be correct which does not make sense
-      // When we go minus 93px to the left, this should jump across the current option and then apply 4px of padding
-      // In this specific case however 4 more pixels are needed but this is just a placeholder
+    } else if (absolutePosition.x >= this.cumulativeWidth) {
+      // When the current menu is bigger than the new menu, the positioning is correct
+      // When the new menu is bigger, than it starts to overlap with the existing menu
 
-      newPosition.x = -(
-        (newMenuDimensions.x + padding / 2)
+      const widthDifference = newMenuDimensions.x - currentMenuWidth;
 
-        // + (newMenuDimensions.x <= currentMenuWidth ? padding : 0)
-      );
+      const offsetX =
+        newMenuDimensions.x <= currentMenuWidth
+          ? newMenuDimensions.x + padding / 2
+          : newMenuDimensions.x + padding * 2.5 - widthDifference;
+
+      newPosition.x = -offsetX;
     } else {
       // We default to the a menu on the right
       newPosition.x = currentMenuWidth + padding;
     }
 
+    // Positioning on the Y axis
     if (availableSpace.y < newMenuDimensions.y) {
       newPosition.y =
         this.optionElement.nativeElement.offsetHeight /
@@ -166,7 +166,6 @@ export class OptionComponent implements OnInit {
       newPosition.y =
         this.index * this.optionElement.nativeElement.offsetHeight;
     }
-    // This handles atleast 3 submenus on small screens, might be unrealistic to target 4+ submenus without any overlap
     return newPosition;
   }
 
